@@ -101,3 +101,29 @@ main {
 .submit-button:hover {
     background-color: #0056b3;
 }
+
+.auth-link {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 1em;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+    background-color: #007bff;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-right: 10px; /* Расстояние между кнопками */
+}
+
+/* Эффекты при наведении и нажатии */
+.auth-link:hover {
+    background-color: #0056b3;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.auth-link:active {
+    transform: translateY(1px);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
