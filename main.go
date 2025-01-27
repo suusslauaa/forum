@@ -7,13 +7,28 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/google/uuid"
 	_ "github.com/mattn/go-sqlite3" // Импорт SQLite драйвера
+	"golang.org/x/crypto/bcrypt"
 )
 
 func initDB() (*sql.DB, error) {
 	db, err := sql.Open("sqlite3", "./forum.db")
 	if err != nil {
 		return nil, err
+	}
+
+	createTable := `
+    CREATE TABLE IF NOT EXISTS users (
+        id TEXT PRIMARY KEY,
+        username TEXT NOT NULL,
+        email TEXT NOT NULL UNIQUE,
+        password TEXT NOT NULL
+    );
+    `
+	_, err = db.Exec(createTable)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	// Создание таблицы категорий
@@ -97,7 +112,6 @@ func createPost(db *sql.DB, title string, content string, categoryId int) error 
 	return err
 }
 
-
 func main() {
 	db, err := initDB()
 	if err != nil {
@@ -120,6 +134,9 @@ func main() {
 		log.Fatal(err)
 	}
 
+	http.HandleFunc("/register", registerHandler)
+	http.HandleFunc("/login", loginHandler)
+	http.HandleFunc("/account", profileHandler)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 	http.HandleFunc("/", homeHandler)
 	http.ListenAndServe(":8080", nil)
@@ -161,7 +178,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tmpl, err := template.ParseFiles("home.html")
+	tmpl, err := template.ParseFiles("./templates/home.html")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -240,136 +257,86 @@ type Category struct {
 	Name string
 }
 
-// import (
-// 	"database/sql"
-// 	"html/template"
-// 	"log"
-// 	"net/http"
+func registerHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		username := r.FormValue("username")
+		email := r.FormValue("email")
+		password := r.FormValue("password")
 
-// 	_ "github.com/mattn/go-sqlite3" // Импорт SQLite драйвера
-// )
+		// Хэшируем пароль
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+		if err != nil {
+			http.Error(w, "Error hashing password", http.StatusInternalServerError)
+			return
+		}
 
-// func initDB() (*sql.DB, error) {
-// 	db, err := sql.Open("sqlite3", "./forum.db")
-// 	if err != nil {
-// 		return nil, err
-// 	}
+		db, err := initDB()
+		if err != nil {
+			log.Fatal(err)
+		}
 
-// 	createTableSQL := `CREATE TABLE IF NOT EXISTS posts (
-// 		"id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-// 		"title" TEXT,
-// 		"content" TEXT
-// 	);`
+		defer db.Close()
 
-// 	_, err = db.Exec(createTableSQL)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+		// Генерируем UUID для пользователя
+		userID := uuid.New().String()
 
-// 	return db, nil
-// }
+		// Вставляем данные пользователя в базу данных
+		query := `INSERT INTO users (id, username, email, password) VALUES (?, ?, ?, ?)`
+		_, err = db.Exec(query, userID, username, email, hashedPassword)
+		if err != nil {
+			http.Error(w, "Error inserting user into database", http.StatusInternalServerError)
+			return
+		}
 
-// func clearTable(db *sql.DB) error {
-//     _, err := db.Exec("DELETE FROM posts")
-//     return err
-// }
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
 
-// func createPost(db *sql.DB, title string, content string) error {
-//     var exists bool
-//     query := `SELECT EXISTS(SELECT 1 FROM posts WHERE title = ? AND content = ?)`
-//     err := db.QueryRow(query, title, content).Scan(&exists)
-//     if err != nil {
-//         return err
-//     }
+	http.ServeFile(w, r, "./templates/register.html")
+}
 
-//     if exists {
-//         return nil // Пост уже существует
-//     }
+func loginHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		email := r.FormValue("email")
+		password := r.FormValue("password")
 
-//     insertPostSQL := `INSERT INTO posts (title, content) VALUES (?, ?)`
-//     _, err = db.Exec(insertPostSQL, title, content)
-//     return err
-// }
+		db, err := initDB()
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer db.Close()
 
-// func main() {
-// 	db, err := initDB()
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	defer db.Close()
+		// Проверяем пользователя по email
+		query := `SELECT id, password FROM users WHERE email = ?`
+		row := db.QueryRow(query, email)
 
-// 	// Очистка таблицы перед добавлением новых данных
-// 	err = clearTable(db)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
+		var storedPassword string
+		var userID string
+		if err := row.Scan(&userID, &storedPassword); err != nil {
+			http.Error(w, "Invalid email or password", http.StatusUnauthorized)
+			return
+		}
 
-// 	err = createPost(db, "First Post", "This is the content of the first post.")
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
+		// Сравниваем пароли
+		err = bcrypt.CompareHashAndPassword([]byte(storedPassword), []byte(password))
+		if err != nil {
+			http.Error(w, "Invalid email or password", http.StatusUnauthorized)
+			return
+		}
 
-// 	err = createPost(db, "Second Post", "This is the content of the second post.")
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
+		// Успешный вход — создаем сессию или просто показываем страницу профиля
+		// В реальном приложении можно использовать cookie или сессии для хранения состояния
 
-// 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
-// 	http.HandleFunc("/", homeHandler)
-// 	http.ListenAndServe(":8080", nil)
-// }
+		http.Redirect(w, r, "/account", http.StatusSeeOther)
+		return
+	}
 
-// type Post struct {
-// 	ID      int
-// 	Title   string
-// 	Content string
-// }
+	http.ServeFile(w, r, "./templates/login.html")
+}
 
-// func homeHandler(w http.ResponseWriter, r *http.Request) {
-// 	db, err := initDB()
-// 	if err != nil {
-// 		http.Error(w, "Database connection error", http.StatusInternalServerError)
-// 		return
-// 	}
-// 	defer db.Close()
+func profileHandler(w http.ResponseWriter, r *http.Request) {
+	// В реальном приложении здесь бы проверялась сессия пользователя
+	// Здесь просто показываем страницу профиля
 
-// 	posts, err := getPosts(db)
-// 	if err != nil {
-// 		http.Error(w, "Error fetching posts", http.StatusInternalServerError)
-// 		return
-// 	}
-
-// 	tmpl, err := template.ParseFiles("home.html")
-// 	if err != nil {
-// 		http.Error(w, err.Error(), http.StatusInternalServerError)
-// 		return
-// 	}
-
-// 	data := struct {
-// 		Posts []Post
-// 	}{
-// 		Posts: posts,
-// 	}
-
-// 	tmpl.Execute(w, data)
-// }
-
-// func getPosts(db *sql.DB) ([]Post, error) {
-// 	rows, err := db.Query("SELECT id, title, content FROM posts")
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	defer rows.Close()
-
-// 	var posts []Post
-// 	for rows.Next() {
-// 		var post Post
-// 		err := rows.Scan(&post.ID, &post.Title, &post.Content)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 		posts = append(posts, post)
-// 	}
-
-// 	return posts, nil
-// }
+	http.ServeFile(w, r, "./templates/account.html")
+}
