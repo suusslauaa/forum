@@ -1,3 +1,51 @@
-<h1>Welcome to your profile!</h1>
-<p>Your profile information.</p>
-<a href="/logout">Logout</a>
+<!DOCTYPE html>
+<link rel="stylesheet" href="../static/account.css">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post Page</title>
+</head>
+<body>
+    <header>
+        <nav class="nav">
+            <a href="/">Home</a>
+            <a href="#">My Posts</a>
+            <a href="#">Liked Posts</a>
+        </nav>
+        <div class="create-post">
+            <button class="create-post-button">Create Post</button>
+            <div class="circle">{{.Username}}
+                <div class="dropdown">
+                    <a href="/account" class="dropdown-link">Account</a>
+                    <a href="/logout" class="dropdown-link">Logout</a>
+                </div>
+            </div>
+        </div>
+    </header>
+    <main>
+        <aside class="sidebar">
+            <p class="sidebar-title">Filter by categories</p>
+            <ul class="category-list">
+                <li><a href="/" class="category-item">All Categories</a></li>
+                {{range .Categories}}
+                <li><a href="/?category_id={{.ID}}" class="category-item">{{.Name}}</a></li>
+                {{end}}
+            </ul>
+        </aside>        
+        <section class="content">
+            {{if .Posts}}
+                {{range .Posts}}
+                <article class="post">
+                    <h2 class="post-title">{{.Title}}</h2>
+                    <p class="post-content">{{.Content}}</p>
+                    <span class="post-category">{{.Category}}</span>
+                </article>
+                {{end}}
+            {{else}}
+                <p>There are no posts yet.</p>
+            {{end}}
+        </section>
+    </main>
+</body>
+</html>
