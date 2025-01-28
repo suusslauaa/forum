@@ -6,31 +6,42 @@ import (
 	"log"
 )
 
+type Comment struct {
+	ID        int
+	PostID    int
+	UserID    int
+	Author    string
+	Content   string
+	CreatedAt string
+}
+
 type Post struct {
 	ID           int
 	Title        string
 	Content      string
-	AuthorID     int    // ID автора
-	Author       string // Имя автора
+	AuthorID     int
+	Author       string
 	CategoryID   int
 	Category     string
 	LikeCount    int
 	DislikeCount int
+	Comments     []Comment // Добавляем список комментариев
 }
 
 func GetPostByID(db *sql.DB, postID int) (Post, error) {
 	var post Post
+	// Получаем пост
 	query := `
 		SELECT 
 			p.id, 
 			p.title, 
 			p.content, 
 			u.username AS author, 
-			p.category_id,                -- Добавлено для получения ID категории
+			p.category_id, 
 			IFNULL(c.name, '') AS category, 
 			p.liked AS like_count, 
 			p.disliked AS dislike_count, 
-			p.author_id                   -- Получаем ID автора
+			p.author_id 
 		FROM posts p
 		LEFT JOIN categories c ON p.category_id = c.id
 		LEFT JOIN users u ON p.author_id = u.id 
@@ -39,18 +50,45 @@ func GetPostByID(db *sql.DB, postID int) (Post, error) {
 	// Выполняем запрос
 	row := db.QueryRow(query, postID)
 
-	// Проверяем ошибку при сканировании результатов
-	err := row.Scan(
-		&post.ID, &post.Title, &post.Content, &post.Author,
-		&post.CategoryID, &post.Category,
-		&post.LikeCount, &post.DislikeCount, &post.AuthorID,
-	)
+	// Проверяем ошибку при сканировании
+	err := row.Scan(&post.ID, &post.Title, &post.Content, &post.Author, &post.CategoryID, &post.Category, &post.LikeCount, &post.DislikeCount, &post.AuthorID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return post, errors.New("post not found")
 		}
 		log.Printf("Error scanning row: %v", err)
 		return post, err
+	}
+
+	// Получаем комментарии для поста
+	commentsQuery := `
+		SELECT 
+			c.id, 
+			c.post_id, 
+			c.user_id, 
+			c.content, 
+			c.created_at, 
+			u.username AS author
+		FROM comments c
+		LEFT JOIN users u ON c.user_id = u.id
+		WHERE c.post_id = ?`
+
+	rows, err := db.Query(commentsQuery, postID)
+	if err != nil {
+		log.Printf("Error querying comments: %v", err)
+		return post, err
+	}
+	defer rows.Close()
+
+	// Заполняем список комментариев
+	for rows.Next() {
+		var comment Comment
+		err := rows.Scan(&comment.ID, &comment.PostID, &comment.UserID, &comment.Content, &comment.CreatedAt, &comment.Author)
+		if err != nil {
+			log.Printf("Error scanning comment: %v", err)
+			return post, err
+		}
+		post.Comments = append(post.Comments, comment)
 	}
 
 	return post, nil

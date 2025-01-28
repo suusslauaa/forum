@@ -7,59 +7,86 @@
     <link rel="stylesheet" href="../static/post.css">
 </head>
 <body>
-    <header>
-        {{if .LoggedIn}}
-        <nav class="nav">
-            <a href="/" class="auth-link">Home</a>
-            <a href="/my-posts" class="auth-link">My Posts</a>
-            <a href="/liked-posts" class="auth-link">Liked Posts</a>
-        </nav>
-        <div class="create-post">
-            <div class="nav2">
-                <a href="/create-post" class="auth-link">Create Post</a>
-            </div>
-            <div class="circle">{{.Username}}
-                <div class="dropdown">
-                    <a href="/logout" class="dropdown-link">Logout</a>
-                </div>
-            </div>
-        </div>
-        {{else}}
-        <nav class="nav">
-            <a href="/" class="auth-link">Home</a>
-        </nav>
+<header>
+    {{if .LoggedIn}}
+    <nav class="nav">
+        <a href="/" class="auth-link">Home</a>
+        <a href="/my-posts" class="auth-link">My Posts</a>
+        <a href="/liked-posts" class="auth-link">Liked Posts</a>
+    </nav>
+    <div class="create-post">
         <div class="nav2">
-            <a href="/register" class="auth-link">Register</a>
-            <a href="/login" class="auth-link">Login</a>
+            <a href="/create-post" class="auth-link">Create Post</a>
         </div>
-        {{end}}
-    </header>
-    <main>
-        <section class="post-container">
-            <h1 class="post-title">{{.Post.Title}}</h1>
-            <p class="post-content">{{.Post.Content}}</p>
-            <p class="post-meta">Category: <span class="post-category">{{.Post.Category}}</span></p>
-            <p class="post-meta">Posted by: <span class="post-author">{{.Post.Author}}</span></p>
-            <div class="post-actions">
-                <div class="actions-left">
-                    <form method="post" action="/post?action=like&id={{.Post.ID}}">
-                        <button type="submit" class="like-button">Like ({{.Post.LikeCount}})</button>
-                    </form>
-
-                    <form method="post" action="/post?action=dislike&id={{.Post.ID}}">
-                        <button type="submit" class="dislike-button">Dislike ({{.Post.DislikeCount}})</button>
-                    </form>
-                </div>
-                {{if .Creator}}
-                <div class="actions-right">
-                    <a href="/edit-post?id={{.Post.ID}}"class="edit-button">Edit</a>
-                    <form method="post" action="/post?action=delete&id={{.Post.ID}}">
-                        <button type="submit" class="delete-button">Delete</button>
-                    </form>
-                </div>
-                {{end}}
+        <div class="circle">{{.Username}}
+            <div class="dropdown">
+                <a href="/logout" class="dropdown-link">Logout</a>
             </div>
-        </section>
-    </main>
+        </div>
+    </div>
+    {{else}}
+    <nav class="nav">
+        <a href="/" class="auth-link">Home</a>
+    </nav>
+    <div class="nav2">
+        <a href="/register" class="auth-link">Register</a>
+        <a href="/login" class="auth-link">Login</a>
+    </div>
+    {{end}}
+</header>
+<main>
+    <section class="post-container">
+        <h1 class="post-title">{{.Post.Title}}</h1>
+        <p class="post-content">{{.Post.Content}}</p>
+        <p class="post-meta">Category: <span class="post-category">{{.Post.Category}}</span></p>
+        <p class="post-meta">Posted by: <span class="post-author">{{.Post.Author}}</span></p>
+        <div class="post-actions">
+            <div class="actions-left">
+                <form method="post" action="/post?action=like&id={{.Post.ID}}">
+                    <button type="submit" class="like-button">Like ({{.Post.LikeCount}})</button>
+                </form>
+
+                <form method="post" action="/post?action=dislike&id={{.Post.ID}}">
+                    <button type="submit" class="dislike-button">Dislike ({{.Post.DislikeCount}})</button>
+                </form>
+            </div>
+            {{if .Creator}}
+            <div class="actions-right">
+                <a href="/edit-post?id={{.Post.ID}}" class="edit-button">Edit</a>
+                <form method="post" action="/post?action=delete&id={{.Post.ID}}">
+                    <button type="submit" class="delete-button">Delete</button>
+                </form>
+            </div>
+            {{end}}
+        </div>
+    </section>
+
+    <!-- Comments Section -->
+    <section class="comments-section">
+        <h2>Comments</h2>
+        {{if .Post.Comments}}
+        <ul class="comments-list">
+            {{range .Post.Comments}}
+            <li class="comment">
+                <p class="comment-content">{{.Content}}</p>
+                <p class="comment-meta">By: <span class="comment-author">{{.Author}}</span> on <span class="comment-date">{{.CreatedAt}}</span></p>
+            </li>
+            {{end}}
+        </ul>
+        {{else}}
+        <p>No comments yet. Be the first to comment!</p>
+        {{end}}
+
+        <!-- Add Comment Form -->
+        {{if .LoggedIn}}
+        <form method="post" action="/post?action=comment&id={{.Post.ID}}">
+            <textarea name="content" placeholder="Add a comment..." required></textarea>
+            <button type="submit" class="comment-button">Post Comment</button>
+        </form>
+        {{else}}
+        <p>You must be logged in to post a comment. <a href="/login">Login</a> or <a href="/register">Register</a>.</p>
+        {{end}}
+    </section>
+</main>
 </body>
 </html>

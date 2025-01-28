@@ -13,6 +13,10 @@ import (
 func PostHandler(w http.ResponseWriter, r *http.Request) {
 	// Проверка сессии
 	sessionID, err := getSessionID(w, r)
+	if err != nil {
+		http.Error(w, "Session error", http.StatusInternalServerError)
+		return
+	}
 
 	username, loggedIn := store[sessionID.Value]
 
@@ -47,14 +51,19 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Получаем комментарии для поста
+	comments := post.Comments
+
 	// Проверяем, является ли текущий пользователь автором поста
 	creator := post.AuthorID == UserID
 
-	// Обрабатываем POST запрос для удаления поста
+	// Обрабатываем POST запрос для добавления комментария
 	if r.Method == http.MethodPost && loggedIn {
 		if err := handlePostActions(w, r, db, postID, creator, UserID); err != nil {
 			return
 		}
+
+		// Перенаправляем на страницу поста с добавленным комментарием
 		http.Redirect(w, r, "/post?id="+strconv.Itoa(postID), http.StatusSeeOther)
 		return
 	}
@@ -66,16 +75,19 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Передаем данные в шаблон
 	datas := struct {
 		LoggedIn bool
 		Creator  bool
 		Username string
 		Post     database.Post
+		Comments []database.Comment
 	}{
 		LoggedIn: loggedIn,
 		Creator:  creator,
 		Username: username,
 		Post:     post,
+		Comments: comments,
 	}
 
 	err = tmpl.Execute(w, datas)
@@ -122,6 +134,16 @@ func handlePostActions(w http.ResponseWriter, r *http.Request, db *sql.DB, postI
 			return err
 		}
 		http.Redirect(w, r, "/my-posts", http.StatusSeeOther)
+	case "comment":
+		commentText := r.FormValue("content")
+		if commentText == "" {
+			http.Error(w, "Comment text is required", http.StatusBadRequest)
+			return nil
+		}
+		if err := database.AddComment(db, postID, userID, commentText); err != nil {
+			http.Error(w, "Error adding comment", http.StatusInternalServerError)
+			return err
+		}
 	default:
 		http.Error(w, "Invalid action", http.StatusBadRequest)
 		return nil

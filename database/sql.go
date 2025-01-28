@@ -68,6 +68,15 @@ func createTables(db *sql.DB) error {
 			FOREIGN KEY (post_id) REFERENCES posts(id),
 			FOREIGN KEY (user_id) REFERENCES users(id)
 		);`,
+		`CREATE TABLE IF NOT EXISTS comments (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    post_id INTEGER NOT NULL,            -- Ссылка на пост
+    user_id INTEGER NOT NULL,            -- Ссылка на пользователя (автора комментария)
+    content TEXT NOT NULL,               -- Содержание комментария
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- Время создания комментария
+    FOREIGN KEY (post_id) REFERENCES posts(id),      -- Внешний ключ на таблицу постов
+    FOREIGN KEY (user_id) REFERENCES users(id)       -- Внешний ключ на таблицу пользователей
+);`,
 	}
 
 	// Выполнение всех запросов на создание таблиц

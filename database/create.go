@@ -164,3 +164,13 @@ func DeletePost(db *sql.DB, postID int) error {
 	_, err := db.Exec(query, postID)
 	return err
 }
+
+func AddComment(db *sql.DB, postID, userID int, content string) error {
+	// Вставляем новый комментарий в таблицу
+	_, err := db.Exec(`
+		INSERT INTO comments (post_id, user_id, content)
+		VALUES (?, ?, ?)`,
+		postID, userID, content,
+	)
+	return err
+}
