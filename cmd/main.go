@@ -6,7 +6,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"net/http"
-	"time"
 )
 
 func main() {
@@ -23,10 +22,11 @@ func main() {
 	//if err != nil {
 	//	log.Fatal(err)
 	//}
-	err = database.CreatePost(db, "First Post", "This is the content of the first post.", 1, 1, time.Now().Format("2006-01-02 15:04:05"))
-	if err != nil {
-		log.Fatal(err) // Логируем и завершаем программу в случае ошибки
-	}
+	//err = database.CreatePost(db, "First Post", "This is the content of the first post.", 1, 1, time.Now().Format("2006-01-02 15:04:05"), 1)
+	//if err != nil {
+	//	print("sosal?")
+	//	log.Fatal(err) // Логируем и завершаем программу в случае ошибки
+	//}
 
 	//err = database.CreatePost(db, "Second Post", "This is the content of the second post.", 2, 2, time.Now().Format("2006-01-02 15:04:05"))
 	//if err != nil {
@@ -41,6 +41,7 @@ func main() {
 	http.HandleFunc("/login", handlers.LoginHandler)
 	http.HandleFunc("/logout", handlers.LogoutHandler)
 	http.HandleFunc("/create-post", handlers.CreatePostHandler)
+	http.HandleFunc("/post", handlers.PostHandler)
 
 	// Запуск сервера
 	log.Println("Сервер запущен на http://localhost:8080")

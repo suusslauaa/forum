@@ -1,12 +1,47 @@
 package database
 
-import "database/sql"
+import (
+	"database/sql"
+	"errors"
+	"log"
+)
 
 type Post struct {
-	ID       int
-	Title    string
-	Content  string
-	Category string
+	ID        int
+	Title     string
+	Content   string
+	AuthorID  int    // ID автора
+	Author    string // Имя автора
+	Category  string
+	LikeCount int
+}
+
+func GetPostByID(db *sql.DB, postID int) (Post, error) {
+	var post Post
+	query := `
+		SELECT p.id, p.title, p.content, u.username AS author, c.name AS category, p.liked AS like_count
+		FROM posts p
+		LEFT JOIN categories c ON p.category_id = c.id
+		LEFT JOIN users u ON p.author_id = u.id 
+		WHERE p.id = ?`
+
+	// Выполняем запрос
+	row := db.QueryRow(query, postID)
+
+	// Проверяем ошибку при сканировании результатов
+	err := row.Scan(&post.ID, &post.Title, &post.Content, &post.Author, &post.Category, &post.LikeCount)
+	if err != nil {
+		// Если не найдено ни одной строки, возвращаем ошибку
+		if errors.Is(err, sql.ErrNoRows) {
+			return post, errors.New("post not found")
+		}
+		// Логируем ошибку
+		log.Printf("Error scanning row: %v", err)
+		return post, err
+	}
+
+	// Если ошибок нет, возвращаем пост
+	return post, nil
 }
 
 func GetPosts(db *sql.DB, categoryID int) ([]Post, error) {

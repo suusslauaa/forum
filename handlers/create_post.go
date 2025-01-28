@@ -91,7 +91,7 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 
 		// Вставляем пост в базу данных
 		createdAt := time.Now().Format("2006-01-02 15:04:05")
-		err = database.CreatePost(db, title, content, authorID, categoryID, createdAt)
+		err = database.CreatePost(db, title, content, authorID, categoryID, createdAt, 0)
 		if err != nil {
 			http.Error(w, "Error saving post to database", http.StatusInternalServerError)
 			return

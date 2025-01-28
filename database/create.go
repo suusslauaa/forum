@@ -7,7 +7,7 @@ import (
 
 // ClearTable удаляет все записи из таблицы posts
 func ClearTable(db *sql.DB) error {
-	_, err := db.Exec("DELETE FROM posts_new")
+	_, err := db.Exec("DELETE FROM posts")
 	return err
 }
 
@@ -24,9 +24,9 @@ func DeleteCategory(db *sql.DB, id int) error {
 }
 
 // CreatePost создает новый пост, привязанный к категории
-func CreatePost(db *sql.DB, title, content string, authorID, categoryID int, createdAt string) error {
-	query := `INSERT INTO posts (title, content, author_id, category_id, created_at) 
-			  VALUES (?, ?, ?, ?, ?);`
+func CreatePost(db *sql.DB, title, content string, authorID, categoryID int, createdAt string, liked int) error {
+	query := `INSERT INTO posts (title, content, author_id, category_id, created_at,liked) 
+			  VALUES (?, ?, ?, ?, ?, ?);`
 
 	// Используем подготовленный запрос для безопасности
 	stmt, err := db.Prepare(query)
@@ -36,7 +36,7 @@ func CreatePost(db *sql.DB, title, content string, authorID, categoryID int, cre
 	defer stmt.Close()
 
 	// Выполняем запрос
-	_, err = stmt.Exec(title, content, authorID, categoryID, createdAt)
+	_, err = stmt.Exec(title, content, authorID, categoryID, createdAt, liked)
 	return err
 }
 

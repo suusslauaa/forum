@@ -42,6 +42,7 @@ func createTables(db *sql.DB) error {
 			category_id INTEGER,
 			author_id INTEGER NOT NULL,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			liked INTEGER DEFAULT 0, -- Начальное значение лайков 0
 			FOREIGN KEY (category_id) REFERENCES categories(id),
 			FOREIGN KEY (author_id) REFERENCES users(id)
 		);`,
@@ -60,6 +61,7 @@ func createTables(db *sql.DB) error {
 		);`,
 	}
 
+	// Выполнение всех запросов на создание таблиц
 	for _, query := range queries {
 		_, err := db.Exec(query)
 		if err != nil {
@@ -67,6 +69,7 @@ func createTables(db *sql.DB) error {
 			return err
 		}
 	}
+
 	return nil
 }
 
