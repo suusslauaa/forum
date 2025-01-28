@@ -7,19 +7,29 @@ import (
 )
 
 type Post struct {
-	ID        int
-	Title     string
-	Content   string
-	AuthorID  int    // ID автора
-	Author    string // Имя автора
-	Category  string
-	LikeCount int
+	ID           int
+	Title        string
+	Content      string
+	AuthorID     int    // ID автора
+	Author       string // Имя автора
+	CategoryID   int
+	Category     string
+	LikeCount    int
+	DislikeCount int
 }
 
 func GetPostByID(db *sql.DB, postID int) (Post, error) {
 	var post Post
 	query := `
-		SELECT p.id, p.title, p.content, u.username AS author, c.name AS category, p.liked AS like_count
+		SELECT 
+			p.id, 
+			p.title, 
+			p.content, 
+			u.username AS author, 
+			p.category_id,               -- Добавляем выбор category_id
+			IFNULL(c.name, '') AS category, 
+			p.liked AS like_count, 
+			p.author_id
 		FROM posts p
 		LEFT JOIN categories c ON p.category_id = c.id
 		LEFT JOIN users u ON p.author_id = u.id 
@@ -29,18 +39,15 @@ func GetPostByID(db *sql.DB, postID int) (Post, error) {
 	row := db.QueryRow(query, postID)
 
 	// Проверяем ошибку при сканировании результатов
-	err := row.Scan(&post.ID, &post.Title, &post.Content, &post.Author, &post.Category, &post.LikeCount)
+	err := row.Scan(&post.ID, &post.Title, &post.Content, &post.Author, &post.CategoryID, &post.Category, &post.LikeCount, &post.AuthorID)
 	if err != nil {
-		// Если не найдено ни одной строки, возвращаем ошибку
 		if errors.Is(err, sql.ErrNoRows) {
 			return post, errors.New("post not found")
 		}
-		// Логируем ошибку
 		log.Printf("Error scanning row: %v", err)
 		return post, err
 	}
 
-	// Если ошибок нет, возвращаем пост
 	return post, nil
 }
 
@@ -78,6 +85,58 @@ func GetPosts(db *sql.DB, categoryID int) ([]Post, error) {
 		posts = append(posts, post)
 	}
 
+	return posts, nil
+}
+
+func GetPostsByUserID(db *sql.DB, userID int) ([]Post, error) {
+	var posts []Post
+	query := `
+        SELECT p.id, p.title, p.content, IFNULL(c.name, '') AS category, p.liked AS like_count
+        FROM posts p
+        LEFT JOIN categories c ON p.category_id = c.id
+        WHERE p.author_id = ?`
+
+	rows, err := db.Query(query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var post Post
+		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.Category, &post.LikeCount)
+		if err != nil {
+			return nil, err
+		}
+		posts = append(posts, post)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return posts, nil
+}
+func GetPostsByUserIDAndCategory(db *sql.DB, userID int, categoryID string) ([]Post, error) {
+	query := `
+		SELECT p.id, p.title, p.content, c.name AS category 
+		FROM posts p
+		JOIN categories c ON p.category_id = c.id 
+		WHERE p.author_id = ? AND p.category_id = ?`
+	rows, err := db.Query(query, userID, categoryID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var posts []Post
+	for rows.Next() {
+		var post Post
+		if err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.Category); err != nil {
+			return nil, err
+		}
+		posts = append(posts, post)
+	}
 	return posts, nil
 }
 

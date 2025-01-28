@@ -27,6 +27,10 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Проверяем, авторизован ли пользователь
 	username, loggedIn := store[sessionID.Value]
+	UserID := 0
+	if loggedIn {
+		UserID = id[sessionID.Value]
+	}
 
 	categoryID := 0
 	if r.URL.Query().Get("category_id") != "" {
@@ -68,11 +72,13 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	// Создаем данные для шаблона, включая информацию о пользователе
 	data := struct {
 		LoggedIn   bool
+		ID         int
 		Username   string
 		Posts      []database.Post
 		Categories []database.Category
 	}{
 		LoggedIn:   loggedIn,
+		ID:         UserID,
 		Username:   username,
 		Posts:      posts,
 		Categories: categories,

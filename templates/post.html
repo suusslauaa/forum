@@ -11,8 +11,8 @@
         {{if .LoggedIn}}
         <nav class="nav">
             <a href="/" class="auth-link">Home</a>
-            <a href="#" class="auth-link">My Posts</a>
-            <a href="#" class="auth-link">Liked Posts</a>
+            <a href="/my-posts" class="auth-link">My Posts</a>
+            <a href="/liked-posts" class="auth-link">Liked Posts</a>
         </nav>
         <div class="create-post">
             <div class="nav2">
@@ -45,13 +45,15 @@
                     <button class="like-button">Like ({{.Post.LikeCount}})</button>
                     <button class="dislike-button">Dislike ({{.Post.DislikeCount}})</button>
                 </div>
-                {{if eq .Post.Author .Username}}
+                {{if .Creator}}
                 <div class="actions-right">
-                    <button class="edit-button">Edit</button>
-                    <button class="delete-button">Delete</button>
+                    <a href="/edit-post?id={{.Post.ID}}"class="edit-button">Edit</a>
+                    <form method="post">
+                        <button type="submit" class="delete-button">Delete</button>
+                    </form>
                 </div>
                 {{end}}
-            </div>            
+            </div>
         </section>
     </main>
 </body>

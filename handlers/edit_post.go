@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"forum/database"
 	"html/template"
 	"net/http"
@@ -8,8 +9,7 @@ import (
 	"time"
 )
 
-// CreatePostHandler обрабатывает создание нового поста
-func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
+func EditPostHandler(w http.ResponseWriter, r *http.Request) {
 	sessionID, err := r.Cookie("session_id")
 	if err != nil {
 		http.Redirect(w, r, "/login", http.StatusFound)
@@ -20,6 +20,19 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", http.StatusFound)
 	}
 	loggedInUserID := id[sessionID.Value]
+
+	postIDStr := r.URL.Query().Get("id")
+	if postIDStr == "" {
+		http.Error(w, "Post ID is required", http.StatusBadRequest)
+		return
+	}
+
+	postID, err := strconv.Atoi(postIDStr)
+	if err != nil {
+		http.Error(w, "Invalid post ID", http.StatusBadRequest)
+		return
+	}
+
 	// Если метод GET, отображаем форму для создания поста
 	if r.Method == http.MethodGet {
 		// Получаем список категорий из базы данных
@@ -30,6 +43,13 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		defer db.Close()
 
+		// Получаем пост из базы данных
+		post, err := database.GetPostByID(db, postID)
+		if err != nil {
+			http.Error(w, "Post not found", http.StatusNotFound)
+			return
+		}
+
 		categories, err := database.GetCategories(db)
 		if err != nil {
 			http.Error(w, "Error fetching categories", http.StatusInternalServerError)
@@ -37,18 +57,20 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Передаем категории в шаблон
-		tmpl, err := template.ParseFiles("templates/create_post.html")
+		tmpl, err := template.ParseFiles("templates/edit_post.html")
 		if err != nil {
 			http.Error(w, "Template parsing error", http.StatusInternalServerError)
 			return
 		}
-
+		fmt.Println(post)
 		data := struct {
+			Post database.Post
 			UserID     int
 			Categories []database.Category
 		}{
 			UserID:     loggedInUserID, // Получите ID пользователя из сессии
 			Categories: categories,
+			Post: post,
 		}
 
 		err = tmpl.Execute(w, data)
@@ -62,14 +84,15 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		title := r.FormValue("title")
 		content := r.FormValue("content")
-		userID := id[sessionID.Value]
+		userID := r.FormValue("user_id")
 		categoryID, err := strconv.Atoi(r.FormValue("category"))
+		fmt.Println(r.FormValue("category"), "aaaaaaaaaaaaaaaaaaa")
 		if err != nil {
 			http.Error(w, "Invalid category ID", http.StatusBadRequest)
 			return
 		}
 
-		if title == "" || content == "" {
+		if title == "" || content == "" || userID == "" {
 			http.Error(w, "All fields are required", http.StatusBadRequest)
 			return
 		}
@@ -84,7 +107,8 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 
 		// Вставляем пост в базу данных
 		createdAt := time.Now().Format("2006-01-02 15:04:05")
-		err = database.CreatePost(db, title, content, userID, categoryID, createdAt, 0)
+		fmt.Println(db, title, content, categoryID, createdAt)
+		err = database.EditPost(db, title, content, categoryID, createdAt, postID)
 		if err != nil {
 			http.Error(w, "Error saving post to database", http.StatusInternalServerError)
 			return

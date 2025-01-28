@@ -43,9 +43,10 @@ func main() {
 	http.HandleFunc("/login", handlers.LoginHandler)
 	http.HandleFunc("/logout", handlers.LogoutHandler)
 	http.HandleFunc("/create-post", handlers.CreatePostHandler)
+	http.HandleFunc("/edit-post", handlers.EditPostHandler)
 	http.HandleFunc("/post", handlers.PostHandler)
-
+	http.HandleFunc("/my-posts", handlers.UserPostHandler)
 	// Запуск сервера
-	log.Println("Сервер запущен на http://localhost:8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Println("Сервер запущен на http://localhost:4000")
+	log.Fatal(http.ListenAndServe(":4000", nil))
 }

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="../static/create_post.css">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Post</title>
+</head>
+<body>
+    <header>
+        <nav class="nav">
+            <a href="/" class="auth-link">Home</a>
+            <a href="#" class="auth-link">My Posts</a>
+            <a href="#" class="auth-link">Liked Posts</a>
+        </nav>
+        <div class="create-post">
+            <div class="nav2">
+                <a href="/create-post" class="auth-link">Edit Post</a>
+            </div>
+            <div class="circle">{{.UserID}}
+                <div class="dropdown">
+                    <a href="/logout" class="dropdown-link">Logout</a>
+                </div>
+            </div>
+        </div>
+    </header>
+    <main>
+        <section class="content">
+            <h1 class="page-title">Edit your post</h1>
+            <form action="/edit-post?id={{.Post.ID}}" method="POST" class="create-post-form">
+                <label for="title" class="form-label">Post Title:</label>
+                <input type="text" id="title" name="title" class="form-input" value="{{.Post.Title}}" required>
+                <label for="content" class="form-label">Post Content:</label>
+                <textarea id="content" name="content" class="form-textarea" required>{{.Post.Content}}</textarea>
+                <label for="category" class="form-label">Category:</label>
+                <select id="category" name="category" class="form-select">
+                    <option value="{{.Post.CategoryID}}" hidden>{{.Post.Category}}</option>
+                    {{range .Categories}}
+                    <option value="{{.ID}}">{{.Name}}</option>
+                    {{end}}
+                </select>
+                <input type="hidden" name="user_id" value="{{.UserID}}">
+                <button type="submit" class="create-post-button">Save</button>
+            </form>
+        </section>
+    </main>
+</body>
+</html>
