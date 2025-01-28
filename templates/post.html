@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="../static/post.css">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Post</title>
+</head>
+<body>
+    <header>
+        <nav class="nav">
+            <a href="/" class="auth-link">Home</a>
+            <a href="#" class="auth-link">My Posts</a>
+            <a href="#" class="auth-link">Liked Posts</a>
+        </nav>
+        <div class="user-info">
+            <div class="circle">{{.UserID}}
+                <div class="dropdown">
+                    <a href="/logout" class="dropdown-link">Logout</a>
+                </div>
+            </div>
+        </div>
+    </header>
+    <main>
+        <section class="post-container">
+            <h1 class="post-title">{{.PostTitle}}</h1>
+            <p class="post-content">{{.PostContent}}</p>
+            <p class="post-meta">Category: <span class="post-category">{{.CategoryName}}</span></p>
+            <p class="post-meta">Posted by: <span class="post-author">{{.AuthorName}}</span></p>
+            <div class="post-actions">
+                <button class="like-button">Like ({{.LikeCount}})</button>
+                <button class="edit-button">Edit</button>
+                <button class="delete-button">Delete</button>
+            </div>
+        </section>
+    </main>
+</body>
+</html>
