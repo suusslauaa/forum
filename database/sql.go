@@ -60,6 +60,14 @@ func createTables(db *sql.DB) error {
 			expires_at TIMESTAMP NOT NULL,
 			FOREIGN KEY(user_id) REFERENCES users(id)
 		);`,
+		`CREATE TABLE IF NOT EXISTS post_reactions (
+			post_id INTEGER NOT NULL,
+			user_id INTEGER NOT NULL,
+			reaction_type TEXT CHECK(reaction_type IN ('like', 'dislike')) NOT NULL, -- Сохраняем тип реакции как текст
+			PRIMARY KEY (post_id, user_id),
+			FOREIGN KEY (post_id) REFERENCES posts(id),
+			FOREIGN KEY (user_id) REFERENCES users(id)
+		);`,
 	}
 
 	// Выполнение всех запросов на создание таблиц

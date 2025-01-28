@@ -42,13 +42,18 @@
             <p class="post-meta">Posted by: <span class="post-author">{{.Post.Author}}</span></p>
             <div class="post-actions">
                 <div class="actions-left">
-                    <button class="like-button">Like ({{.Post.LikeCount}})</button>
-                    <button class="dislike-button">Dislike ({{.Post.DislikeCount}})</button>
+                    <form method="post" action="/post?action=like&id={{.Post.ID}}">
+                        <button type="submit" class="like-button">Like ({{.Post.LikeCount}})</button>
+                    </form>
+
+                    <form method="post" action="/post?action=dislike&id={{.Post.ID}}">
+                        <button type="submit" class="dislike-button">Dislike ({{.Post.DislikeCount}})</button>
+                    </form>
                 </div>
                 {{if .Creator}}
                 <div class="actions-right">
                     <a href="/edit-post?id={{.Post.ID}}"class="edit-button">Edit</a>
-                    <form method="post">
+                    <form method="post" action="/post?action=delete&id={{.Post.ID}}">
                         <button type="submit" class="delete-button">Delete</button>
                     </form>
                 </div>

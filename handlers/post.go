@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"database/sql"
 	"forum/database"
 	"github.com/gofrs/uuid"
 	"html/template"
@@ -10,29 +11,13 @@ import (
 
 // PostHandler обрабатывает отображение конкретного поста
 func PostHandler(w http.ResponseWriter, r *http.Request) {
-	// Получаем параметр ID поста из URL
-	sessionID, err := r.Cookie("session_id")
-	if err != nil {
-		// Если сессии нет, создаем новую
-		sessionID = &http.Cookie{
-			Name:  "session_id",
-			Value: uuid.Must(uuid.NewV4()).String(), // Используем gofrs/uuid для генерации UUID
-		}
-		http.SetCookie(w, sessionID)
-	}
+	// Проверка сессии
+	sessionID, err := getSessionID(w, r)
 
 	username, loggedIn := store[sessionID.Value]
-	if !loggedIn {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
 
 	// Получаем ID пользователя по имени
-	UserID, ok := id[sessionID.Value]
-	if !ok {
-		http.Error(w, "User not found", http.StatusUnauthorized)
-		return
-	}
+	UserID, _ := id[sessionID.Value]
 
 	// Получаем ID поста из параметров URL
 	postIDStr := r.URL.Query().Get("id")
@@ -63,22 +48,14 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Проверяем, является ли текущий пользователь автором поста
-	creator := false
-	if post.AuthorID == UserID {
-		creator = true
-	}
+	creator := post.AuthorID == UserID
 
 	// Обрабатываем POST запрос для удаления поста
-	if r.Method == http.MethodPost && creator {
-		// Удаляем пост
-		err := database.DeletePost(db, postID)
-		if err != nil {
-			http.Error(w, "Error deleting post", http.StatusInternalServerError)
+	if r.Method == http.MethodPost && loggedIn {
+		if err := handlePostActions(w, r, db, postID, creator, UserID); err != nil {
 			return
 		}
-
-		// Перенаправляем на страницу с постами
-		http.Redirect(w, r, "/my-posts", http.StatusSeeOther)
+		http.Redirect(w, r, "/post?id="+strconv.Itoa(postID), http.StatusSeeOther)
 		return
 	}
 
@@ -89,7 +66,6 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Данные для шаблона
 	datas := struct {
 		LoggedIn bool
 		Creator  bool
@@ -102,12 +78,56 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 		Post:     post,
 	}
 
-	// Прямо вызываем шаблон без дополнительных вызовов WriteHeader
 	err = tmpl.Execute(w, datas)
 	if err != nil {
 		http.Error(w, "Error rendering template", http.StatusInternalServerError)
 		return
 	}
+}
+
+// Функция для получения sessionID из cookies
+func getSessionID(w http.ResponseWriter, r *http.Request) (*http.Cookie, error) {
+	sessionID, err := r.Cookie("session_id")
+	if err != nil {
+		sessionID = &http.Cookie{
+			Name:  "session_id",
+			Value: uuid.Must(uuid.NewV4()).String(),
+		}
+		http.SetCookie(w, sessionID)
+	}
+	return sessionID, err
+}
+
+// Обрабатываем лайки, дизлайки и удаление
+func handlePostActions(w http.ResponseWriter, r *http.Request, db *sql.DB, postID int, creator bool, userID int) error {
+	action := r.URL.Query().Get("action")
+	switch action {
+	case "like":
+		if err := database.ToggleLike(db, postID, userID); err != nil {
+			http.Error(w, "Error processing like", http.StatusInternalServerError)
+			return err
+		}
+	case "dislike":
+		if err := database.ToggleDislike(db, postID, userID); err != nil {
+			http.Error(w, "Error processing dislike", http.StatusInternalServerError)
+			return err
+		}
+	case "delete":
+		if !creator {
+			http.Error(w, "You are not the creator of this post", http.StatusForbidden)
+			return nil
+		}
+		if err := database.DeletePost(db, postID); err != nil {
+			http.Error(w, "Error deleting post", http.StatusInternalServerError)
+			return err
+		}
+		http.Redirect(w, r, "/my-posts", http.StatusSeeOther)
+	default:
+		http.Error(w, "Invalid action", http.StatusBadRequest)
+		return nil
+	}
+
+	return nil
 }
 
 func UserPostHandler(w http.ResponseWriter, r *http.Request) {

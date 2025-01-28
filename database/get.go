@@ -26,10 +26,11 @@ func GetPostByID(db *sql.DB, postID int) (Post, error) {
 			p.title, 
 			p.content, 
 			u.username AS author, 
-			p.category_id,               -- Добавляем выбор category_id
+			p.category_id,                -- Добавлено для получения ID категории
 			IFNULL(c.name, '') AS category, 
 			p.liked AS like_count, 
-			p.author_id
+			p.disliked AS dislike_count, 
+			p.author_id                   -- Получаем ID автора
 		FROM posts p
 		LEFT JOIN categories c ON p.category_id = c.id
 		LEFT JOIN users u ON p.author_id = u.id 
@@ -39,7 +40,11 @@ func GetPostByID(db *sql.DB, postID int) (Post, error) {
 	row := db.QueryRow(query, postID)
 
 	// Проверяем ошибку при сканировании результатов
-	err := row.Scan(&post.ID, &post.Title, &post.Content, &post.Author, &post.CategoryID, &post.Category, &post.LikeCount, &post.AuthorID)
+	err := row.Scan(
+		&post.ID, &post.Title, &post.Content, &post.Author,
+		&post.CategoryID, &post.Category,
+		&post.LikeCount, &post.DislikeCount, &post.AuthorID,
+	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return post, errors.New("post not found")
