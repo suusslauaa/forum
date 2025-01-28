@@ -160,25 +160,38 @@ func GetPostsByUserID(db *sql.DB, userID int) ([]Post, error) {
 
 	return posts, nil
 }
-func GetPostsByUserIDAndCategory(db *sql.DB, userID int, categoryID string) ([]Post, error) {
+
+func GetLikedPostsByUserID(db *sql.DB, userID int) ([]Post, error) {
+	var posts []Post
+
 	query := `
-		SELECT p.id, p.title, p.content, c.name AS category 
+		SELECT 
+			p.id, p.title, p.content, IFNULL(c.name, '') AS category, 
+			u.username AS author
 		FROM posts p
-		JOIN categories c ON p.category_id = c.id 
-		WHERE p.author_id = ? AND p.category_id = ?`
-	rows, err := db.Query(query, userID, categoryID)
+		LEFT JOIN categories c ON p.category_id = c.id
+		LEFT JOIN users u ON p.author_id = u.id
+		INNER JOIN post_reactions pr ON p.id = pr.post_id
+		WHERE pr.user_id = ? AND pr.reaction_type = 'like'
+	`
+
+	rows, err := db.Query(query, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var posts []Post
 	for rows.Next() {
 		var post Post
-		if err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.Category); err != nil {
+		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.Category, &post.Author)
+		if err != nil {
 			return nil, err
 		}
 		posts = append(posts, post)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
 	}
 	return posts, nil
 }
