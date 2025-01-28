@@ -7,32 +7,52 @@
     <link rel="stylesheet" href="../static/post.css">
 </head>
 <body>
-<header>
-    <nav class="nav">
-        <a href="/" class="auth-link">Home</a>
-        <a href="#" class="auth-link">My Posts</a>
-        <a href="#" class="auth-link">Liked Posts</a>
-    </nav>
-    <div class="user-info">
-        <div class="circle">{{.Username}}
-            <div class="dropdown">
-                <a href="/logout" class="dropdown-link">Logout</a>
+    <header>
+        {{if .LoggedIn}}
+        <nav class="nav">
+            <a href="/" class="auth-link">Home</a>
+            <a href="#" class="auth-link">My Posts</a>
+            <a href="#" class="auth-link">Liked Posts</a>
+        </nav>
+        <div class="create-post">
+            <div class="nav2">
+                <a href="/create-post" class="auth-link">Create Post</a>
+            </div>
+            <div class="circle">{{.Username}}
+                <div class="dropdown">
+                    <a href="/logout" class="dropdown-link">Logout</a>
+                </div>
             </div>
         </div>
-    </div>
-</header>
-<main>
-    <section class="post-container">
-        <h1 class="post-title">{{.Post.Title}}</h1>
-        <p class="post-content">{{.Post.Content}}</p>
-        <p class="post-meta">Category: <span class="post-category">{{.Post.Category}}</span></p>
-        <p class="post-meta">Posted by: <span class="post-author">{{.Post.Author}}</span></p>
-        <div class="post-actions">
-            <button class="like-button">Like ({{.Post.LikeCount}})</button>
-            <button class="edit-button">Edit</button>
-            <button class="delete-button">Delete</button>
+        {{else}}
+        <nav class="nav">
+            <a href="/" class="auth-link">Home</a>
+        </nav>
+        <div class="nav2">
+            <a href="/register" class="auth-link">Register</a>
+            <a href="/login" class="auth-link">Login</a>
         </div>
-    </section>
-</main>
+        {{end}}
+    </header>
+    <main>
+        <section class="post-container">
+            <h1 class="post-title">{{.Post.Title}}</h1>
+            <p class="post-content">{{.Post.Content}}</p>
+            <p class="post-meta">Category: <span class="post-category">{{.Post.Category}}</span></p>
+            <p class="post-meta">Posted by: <span class="post-author">{{.Post.Author}}</span></p>
+            <div class="post-actions">
+                <div class="actions-left">
+                    <button class="like-button">Like ({{.Post.LikeCount}})</button>
+                    <button class="dislike-button">Dislike ({{.Post.DislikeCount}})</button>
+                </div>
+                {{if eq .Post.Author .Username}}
+                <div class="actions-right">
+                    <button class="edit-button">Edit</button>
+                    <button class="delete-button">Delete</button>
+                </div>
+                {{end}}
+            </div>            
+        </section>
+    </main>
 </body>
 </html>

@@ -1,4 +1,3 @@
-/* Сброс стилей для всех элементов */
 * {
     margin: 0;
     padding: 0;
@@ -13,7 +12,6 @@ body {
     background-color: #f9f9f9;
 }
 
-/* Стиль для header */
 header {
     display: flex;
     justify-content: space-between;
@@ -21,28 +19,41 @@ header {
     padding: 10px 20px;
     background-color: #007bff;
     color: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 70px;
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
+
 header .nav a {
     color: white;
     text-decoration: none;
     margin-right: 15px;
 }
 
-/* Кнопка создания поста */
 header .create-post {
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-/* Основной контейнер */
 main {
     display: flex;
     flex: 1;
-    margin: 20px;
+    margin-top: 70px;
+    justify-content: center; /* Горизонтальное центрирование */
+    align-items: center;    /* Вертикальное центрирование (опционально) */
+    flex-direction: column; /* Содержимое располагается столбцом */
+    margin: 0 auto;
+    width: 100%;
+    max-width: 1200px;      /* Ограничение ширины для основного контента */
+    padding: 20px;          /* Внутренний отступ для эстетики */
+    box-sizing: border-box; /* Учет отступов и рамок */
 }
 
-/* Сайдбар */
 .sidebar {
     width: 25%;
     background-color: #e9ecef;
@@ -50,11 +61,17 @@ main {
     border-radius: 10px;
     margin-right: 20px;
 }
+
 .content {
-    width: 75%;
+    width: 100%;
+    max-width: 600px;       /* Ограничение ширины контента */
     padding: 20px;
+    background: #ffffff;    /* Фон для контента */
+    border-radius: 10px;    /* Округление краев */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Легкая тень */
+    text-align: left;       /* Выравнивание текста по левому краю */
 }
-/* Стили для кругов */
+
 .circle {
     width: 40px;
     height: 40px;
@@ -69,10 +86,11 @@ main {
     cursor: pointer;
     position: relative;
 }
-/* Dropdown меню */
+
 .circle:hover .dropdown {
     display: flex;
 }
+
 .dropdown {
     display: none;
     flex-direction: column;
@@ -87,6 +105,7 @@ main {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     z-index: 10;
 }
+
 .circle::after {
     content: '';
     position: absolute;
@@ -97,7 +116,7 @@ main {
     background: transparent; /* Делаем её невидимой */
     z-index: 5;
 }
-/* Кнопки dropdown */
+
 .dropdown button {
     background: none;
     border: none;
@@ -108,10 +127,11 @@ main {
     color: #333;
     text-align: left;
 }
+
 .dropdown button:hover {
     background-color: #f4f4f4;
 }
-/* Стили для постов */
+
 .post {
     background-color: white;
     border: 1px solid #ddd;
@@ -121,15 +141,18 @@ main {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     transition: transform 0.2s, box-shadow 0.2s;
 }
+
 .post:hover {
     transform: translateY(-5px);
     box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
 }
+
 .post-title {
     font-size: 1.5em;
     margin-bottom: 10px;
     color: #007bff;
 }
+
 .post-content {
     font-size: 1em;
     line-height: 1.6;
@@ -141,7 +164,7 @@ main {
     font-style: italic;
     margin-top: 10px;
 }
-/* Стили кнопки создания поста */
+
 .create-post-button {
     background-color: #007bff;
     color: white;
@@ -154,23 +177,27 @@ main {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
 }
+
 .create-post-button:hover {
     background-color: #0056b3;
     transform: translateY(-3px);
     box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
 }
+
 .create-post-button:active {
     transform: translateY(1px);
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
 }
-/* Стили для списка категорий */
+
 .category-list {
     list-style: none;
     padding: 0;
 }
+
 .category-list li {
     margin: 10px 0;
 }
+
 .category-item {
     display: block;
     padding: 10px;
@@ -180,31 +207,17 @@ main {
     border-radius: 4px;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
+
 .category-item:hover {
     background-color: #007bff;
     color: white;
 }
+
 .sidebar-title {
     font-size: 18px;
     font-weight: bold;
     margin-bottom: 15px;
     color: #333;
-}
-
-/* Dropdown Menu */
-.circle {
-    width: 40px;
-    height: 40px;
-    background-color: white;
-    color: #007bff;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-weight: bold;
-    margin-left: 10px;
-    cursor: pointer;
-    position: relative;
 }
 
 .circle:hover .dropdown {
@@ -240,20 +253,6 @@ main {
     color: white;
 }
 
-.sidebar {
-    width: 25%;
-    background-color: #e9ecef;
-    padding: 15px;
-    border-radius: 10px;
-    margin-right: 20px;
-}
-
-.content {
-    width: 75%;
-    padding: 20px;
-}
-
-/* Добавляем область между кругом и меню */
 .circle::after {
     content: '';
     position: absolute;
@@ -265,7 +264,6 @@ main {
     z-index: 1; /* Чтобы область находилась над другими элементами */
 }
 
-/* Dropdown меню */
 .dropdown {
     display: none;
     flex-direction: column;
@@ -281,7 +279,6 @@ main {
     z-index: 10;
 }
 
-/* Показываем меню при наведении */
 .circle:hover .dropdown,
 .dropdown:hover {
     display: flex;
@@ -301,7 +298,6 @@ main {
     margin-right: 10px; /* Расстояние между кнопками */
 }
 
-/* Эффекты при наведении и нажатии */
 .auth-link:hover {
     background-color: #0056b3;
     transform: translateY(-3px);
@@ -313,7 +309,6 @@ main {
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
 }
 
-/* Стили для страницы создания поста */
 .page-title {
     font-size: 2rem;
     font-weight: bold;
@@ -383,63 +378,4 @@ main {
 
 .create-post-button:active {
     transform: translateY(1px);
-}
-
-main {
-    display: flex;
-    justify-content: center; /* Горизонтальное центрирование */
-    align-items: center;    /* Вертикальное центрирование (опционально) */
-    flex-direction: column; /* Содержимое располагается столбцом */
-    flex: 1;
-    margin: 0 auto;         /* Центрирование блока main */
-    width: 100%;
-    max-width: 1200px;      /* Ограничение ширины для основного контента */
-    padding: 20px;          /* Внутренний отступ для эстетики */
-    box-sizing: border-box; /* Учет отступов и рамок */
-}
-
-.content {
-    width: 100%;
-    max-width: 600px;       /* Ограничение ширины контента */
-    padding: 20px;
-    background: #ffffff;    /* Фон для контента */
-    border-radius: 10px;    /* Округление краев */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Легкая тень */
-    text-align: left;       /* Выравнивание текста по левому краю */
-}
-
-/* Фиксированный хедер */
-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 70px; /* Высота хедера */
-    background-color: #007bff;
-    color: white;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 20px;
-    z-index: 1000; /* Чтобы хедер был сверху */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-}
-
-/* Отступ для основного содержимого */
-main {
-    margin-top: 70px; /* Отступ равен высоте хедера */
-}
-
-/* Стили для сайдбара и контента */
-.sidebar {
-    width: 25%;
-    background-color: #e9ecef;
-    padding: 15px;
-    border-radius: 10px;
-    margin-right: 20px;
-}
-
-.content {
-    width: 75%;
-    padding: 20px;
 }
