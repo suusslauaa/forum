@@ -44,7 +44,11 @@ func main() {
 	http.HandleFunc("/my-posts", handlers.UserPostHandler)
 	http.HandleFunc("/liked-posts", handlers.LikePostHandler)
 	http.HandleFunc("/comment", handlers.CommentHandler)
-
+	http.HandleFunc("/gomoder", handlers.ShowPromotionFormHandler)
+	http.HandleFunc("/submit-promotion-request", handlers.SubmitPromotionRequestHandler)
+	http.HandleFunc("/approve-request", handlers.ApproveRequestHandler)
+	http.HandleFunc("/deny-request", handlers.DenyRequestHandler)
+	http.HandleFunc("/requests", handlers.AdminPromotionRequestsHandler)
 	http.HandleFunc("/google/login", handlers.GoogleLogin)
 	http.HandleFunc("/callback", handlers.GoogleCallback)
 	http.HandleFunc("/github/login", handlers.GitHubLogin)

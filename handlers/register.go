@@ -62,7 +62,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		defer db.Close()
 
 		_, err = db.Exec(
-			"INSERT INTO users (email, username, password) VALUES (?, ?, ?)",
+			"INSERT INTO users (email, username, password,role) VALUES (?, ?, ?, 'user')",
 			req.Email, req.Username, hashedPassword,
 		)
 		if err != nil {

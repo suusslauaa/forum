@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"forum/database"
 	"html/template"
 	"log"
@@ -30,10 +31,10 @@ var (
 )
 
 var goauth2Config = oauth2.Config{
-	ClientID:     "",                     // Замените на ваш Client ID
-	ClientSecret: "", // Замените на ваш Client Secret
-	RedirectURL:  "http://localhost:4000/github/callback",    // Убедитесь, что ваш redirect URL совпадает с настройками приложения на GitHub
-	Scopes:       []string{"user:email"},                     // GitHub предоставляет доступ к email и данным пользователя
+	ClientID:     "",                                      // Замените на ваш Client ID
+	ClientSecret: "",                                      // Замените на ваш Client Secret
+	RedirectURL:  "http://localhost:4000/github/callback", // Убедитесь, что ваш redirect URL совпадает с настройками приложения на GitHub
+	Scopes:       []string{"user:email"},                  // GitHub предоставляет доступ к email и данным пользователя
 	Endpoint: oauth2.Endpoint{
 		AuthURL:  "https://github.com/login/oauth/authorize",
 		TokenURL: "https://github.com/login/oauth/access_token",
@@ -105,7 +106,7 @@ func GoogleCallback(w http.ResponseWriter, r *http.Request) {
 
 	// Если пользователя нет, создаем его в базе данных
 	if user == nil {
-		err = database.CreateUser(db, userInfo.Email, userInfo.Name, "defaultpassword")
+		err = database.CreateUser(db, userInfo.Email, userInfo.Name, "defaultpassword", "user")
 		if err != nil {
 			http.Error(w, "Error creating user", http.StatusInternalServerError)
 			return
@@ -205,7 +206,7 @@ func GitHubCallback(w http.ResponseWriter, r *http.Request) {
 
 	// Если пользователя нет, создаем его в базе данных
 	if user == nil {
-		err = database.CreateUser(db, userInfo.Email, userInfo.Login, "defaultpassword")
+		err = database.CreateUser(db, userInfo.Email, userInfo.Login, "defaultpassword", "user")
 		if err != nil {
 			http.Error(w, "Error creating user", http.StatusInternalServerError)
 			return
@@ -252,8 +253,32 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	// Проверяем, авторизован ли пользователь
 	username, loggedIn := store[sessionID.Value]
 	UserID := 0
+	var role string
 	if loggedIn {
 		UserID = id[sessionID.Value]
+
+		// Получаем роль пользователя
+		db, err := database.InitDB()
+		if err != nil {
+			ErrorHandler(w, "Database connection error", http.StatusInternalServerError)
+			return
+		}
+		defer db.Close()
+
+		role, err = GetUserRole(db, UserID)
+		if err != nil {
+			ErrorHandler(w, "Error fetching user role", http.StatusInternalServerError)
+			return
+		}
+	}
+	Moders := false
+	if role == "moder" || role == "admin" {
+		Moders = true
+	}
+	fmt.Println(role)
+	admin := false
+	if role == "admin" {
+		admin = true
 	}
 
 	categoryID := 0
@@ -300,12 +325,16 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		Username   string
 		Posts      []database.Post
 		Categories []database.Category
+		Moder      bool
+		Admin      bool
 	}{
 		LoggedIn:   loggedIn,
 		ID:         UserID,
 		Username:   username,
 		Posts:      posts,
 		Categories: categories,
+		Moder:      Moders,
+		Admin:      admin,
 	}
 
 	tmpl.Execute(w, data)

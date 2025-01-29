@@ -4,7 +4,19 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+
+	"golang.org/x/crypto/bcrypt"
 )
+
+// hashPassword is a function that would hash the password before saving it
+func hashPassword(password string) (string, error) {
+	// For example, using bcrypt:
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", fmt.Errorf("error hashing password: %w", err)
+	}
+	return string(hashedPassword), nil
+}
 
 // ClearTable удаляет все записи из таблицы posts
 func ClearTable(db *sql.DB) error {
@@ -73,19 +85,36 @@ func CreatePost(db *sql.DB, title, content string, authorID, categoryID int, cre
 	return err
 }
 
-func CreateUser(db *sql.DB, email, username, password string) error {
-	// SQL-запрос для вставки пользователя в таблицу
-	query := `INSERT INTO users (email, username, password) VALUES (?, ?, ?);`
+func CreateUser(db *sql.DB, email, username, password, role string) error {
+	// Validate the role before inserting
+	validRoles := map[string]bool{
+		"guest":     true,
+		"user":      true,
+		"moderator": true,
+		"admin":     true,
+	}
 
-	// Подготовка запроса
+	if !validRoles[role] {
+		return fmt.Errorf("invalid role: %s", role)
+	}
+
+	// Hash the password (consider using bcrypt or Argon2)
+	hashedPassword, err := hashPassword(password)
+	if err != nil {
+		return fmt.Errorf("error hashing password: %w", err)
+	}
+
+	query := `INSERT INTO users (email, username, password, role) VALUES (?, ?, ?, ?);`
+
+	// Prepare the query
 	stmt, err := db.Prepare(query)
 	if err != nil {
 		return fmt.Errorf("error preparing statement: %w", err)
 	}
 	defer stmt.Close()
 
-	// Выполнение запроса
-	_, err = stmt.Exec(email, username, password)
+	// Execute the query
+	_, err = stmt.Exec(email, username, hashedPassword, role)
 	if err != nil {
 		return fmt.Errorf("error creating user: %w", err)
 	}
@@ -185,4 +214,37 @@ func AddComment(db *sql.DB, postID, userID int, content string) error {
 		postID, userID, content,
 	)
 	return err
+}
+
+func UpdatePostStatus(db *sql.DB, postID int, newStatus string) error {
+	// Проверка, что статус допустим
+	validStatuses := []string{"pending", "approved", "rejected"}
+	isValid := false
+	for _, status := range validStatuses {
+		if status == newStatus {
+			isValid = true
+			break
+		}
+	}
+
+	if !isValid {
+		return fmt.Errorf("Invalid status: %s", newStatus)
+	}
+
+	// Обновляем статус поста
+	query := `UPDATE posts SET status = ? WHERE id = ?;`
+
+	stmt, err := db.Prepare(query)
+	if err != nil {
+		log.Println("Error preparing query:", err)
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(newStatus, postID)
+	if err != nil {
+		log.Println("Error executing query:", err)
+		return err
+	}
+	return nil
 }

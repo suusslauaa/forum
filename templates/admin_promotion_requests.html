@@ -1,0 +1,43 @@
+<!-- templates/admin_promotion_requests.html -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Заявки на повышение до модератора</title>
+</head>
+<body>
+<h1>Заявки на повышение до модератора</h1>
+<table border="1">
+    <thead>
+    <tr>
+        <th>UserID</th>
+        <th>Username</th>
+        <th>Причина</th>
+        <th>Дата подачи</th>
+        <th>Действия</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{range .Requests}}
+    <tr>
+        <td>{{.UserID}}</td>
+        <td>{{.Username}}</td>
+        <td>{{.Reason}}</td>
+        <td>{{.Created}}</td>
+        <td>
+            <form action="/approve-request" method="POST" style="display:inline;">
+                <input type="hidden" name="request_id" value="{{.ID}}">
+                <button type="submit">Одобрить</button>
+            </form>
+            <form action="/deny-request" method="POST" style="display:inline;">
+                <input type="hidden" name="request_id" value="{{.ID}}">
+                <button type="submit">Отклонить</button>
+            </form>
+        </td>
+    </tr>
+    {{end}}
+    </tbody>
+</table>
+</body>
+</html>
