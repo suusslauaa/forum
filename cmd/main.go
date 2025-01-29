@@ -43,6 +43,7 @@ func main() {
 	http.HandleFunc("/post", handlers.PostHandler)
 	http.HandleFunc("/my-posts", handlers.UserPostHandler)
 	http.HandleFunc("/liked-posts", handlers.LikePostHandler)
+	http.HandleFunc("/comment", handlers.CommentHandler)
 
 	http.HandleFunc("/google/login", handlers.GoogleLogin)
 	http.HandleFunc("/callback", handlers.GoogleCallback)

@@ -2,8 +2,9 @@ package database
 
 import (
 	"database/sql"
-	_ "github.com/mattn/go-sqlite3"
 	"log"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var DB *sql.DB
@@ -69,12 +70,22 @@ func createTables(db *sql.DB) error {
 			FOREIGN KEY (post_id) REFERENCES posts(id),
 			FOREIGN KEY (user_id) REFERENCES users(id)
 		);`,
+		`CREATE TABLE IF NOT EXISTS comment_reactions (
+			comment_id INTEGER NOT NULL,
+			user_id INTEGER NOT NULL,
+			reaction_type TEXT CHECK(reaction_type IN ('like', 'dislike')) NOT NULL, -- Сохраняем тип реакции как текст
+			PRIMARY KEY (comment_id, user_id),
+			FOREIGN KEY (comment_id) REFERENCES comments(id),
+			FOREIGN KEY (user_id) REFERENCES users(id)
+		);`,
 		`CREATE TABLE IF NOT EXISTS comments (
     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     post_id INTEGER NOT NULL,            -- Ссылка на пост
     user_id INTEGER NOT NULL,            -- Ссылка на пользователя (автора комментария)
     content TEXT NOT NULL,               -- Содержание комментария
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- Время создания комментария
+	liked INTEGER DEFAULT 0, -- Начальное значение лайков 0
+	disliked INTEGER DEFAULT 0, -- Начальное значение лайков 0
     FOREIGN KEY (post_id) REFERENCES posts(id),      -- Внешний ключ на таблицу постов
     FOREIGN KEY (user_id) REFERENCES users(id)       -- Внешний ключ на таблицу пользователей
 );`,

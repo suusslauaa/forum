@@ -7,12 +7,14 @@ import (
 )
 
 type Comment struct {
-	ID        int
-	PostID    int
-	UserID    int
-	Author    string
-	Content   string
-	CreatedAt string
+	ID           int
+	PostID       int
+	UserID       int
+	Author       string
+	Content      string
+	CreatedAt    string
+	LikeCount    int
+	DislikeCount int
 }
 
 type Post struct {
@@ -70,6 +72,8 @@ func GetPostByID(db *sql.DB, postID int) (Post, error) {
 			c.user_id, 
 			c.content, 
 			c.created_at, 
+			c.liked AS like_count, 
+			c.disliked AS dislike_count, 
 			u.username AS author
 		FROM comments c
 		LEFT JOIN users u ON c.user_id = u.id
@@ -85,7 +89,7 @@ func GetPostByID(db *sql.DB, postID int) (Post, error) {
 	// Заполняем список комментариев
 	for rows.Next() {
 		var comment Comment
-		err := rows.Scan(&comment.ID, &comment.PostID, &comment.UserID, &comment.Content, &comment.CreatedAt, &comment.Author)
+		err := rows.Scan(&comment.ID, &comment.PostID, &comment.UserID, &comment.Content, &comment.CreatedAt, &comment.LikeCount, &comment.DislikeCount, &comment.Author)
 		if err != nil {
 			log.Printf("Error scanning comment: %v", err)
 			return post, err
@@ -221,4 +225,27 @@ func GetCategories(db *sql.DB) ([]Category, error) {
 type Category struct {
 	ID   int
 	Name string
+}
+
+func GetPostIDByCommentID(db *sql.DB, commentID int) (postID int, err error) {
+	query := `
+		SELECT 
+			p.post_id
+		FROM comments p
+		WHERE p.id = ?`
+
+	// Выполняем запрос
+	row := db.QueryRow(query, commentID)
+
+	// Проверяем ошибку при сканировании
+	err = row.Scan(&postID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return postID, errors.New("post not found")
+		}
+		log.Printf("Error scanning row: %v", err)
+		return postID, err
+	}
+
+	return
 }

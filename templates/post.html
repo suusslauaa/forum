@@ -43,6 +43,7 @@
         {{end}}      
         <p class="post-meta">Category: <span class="post-category">{{.Post.Category}}</span></p>
         <p class="post-meta">Posted by: <span class="post-author">{{.Post.Author}}</span></p>
+        {{if .LoggedIn}}
         <div class="post-actions">
             <div class="actions-left">
                 <form method="post" action="/post?action=like&id={{.Post.ID}}">
@@ -62,6 +63,14 @@
             </div>
             {{end}}
         </div>
+        {{else}}
+        <div class="post-actions">
+            <div class="actions-left">
+                <p type="submit" class="like-button">Like ({{.Post.LikeCount}})</button>
+                <p type="submit" class="dislike-button">Dislike ({{.Post.DislikeCount}})</button>
+            </div>
+        </div>
+        {{end}}
     </section>
 
     <!-- Comments Section -->
@@ -69,12 +78,31 @@
         <h2>Comments</h2>
         {{if .Post.Comments}}
         <ul class="comments-list">
-            {{range .Post.Comments}}
-            <li class="comment">
-                <p class="comment-content">{{.Content}}</p>
-                <p class="comment-meta">By: <span class="comment-author">{{.Author}}</span> on <span class="comment-date">{{.CreatedAt}}</span></p>
-            </li>
-            {{end}}
+            {{range .Comments }}
+            <div>
+                <p>{{ .Author }}: {{ .Content }}</p>
+                {{if $.LoggedIn}}
+                <form method="post" action="/comment?id={{.ID}}&action=like">
+                    <button type="submit">👍 Like</button>
+                </form> ({{ .LikeCount }})
+                <form method="post" action="/comment?id={{.ID}}&action=dislike">
+                    <button type="submit">👎 Dislike</button>
+                </form> ({{ .DislikeCount }}) 
+                {{if eq .UserID $.SessionUserID}}
+                <form method="post" action="/comment?id={{.ID}}&action=update">
+                    <input type="text" name="content" value="{{ .Content }}">
+                    <button type="submit">Update</button>
+                </form>
+                <form method="post" action="/comment?id={{.ID}}&action=delete">
+                    <button type="submit">Delete</button>
+                </form>
+                {{end}}
+                {{else}}
+                <p>👍 Like</a> ({{ .LikeCount }})
+                <p>👎 Dislike</a> ({{ .DislikeCount }}) 
+                {{end}}
+            </div>
+            {{ end }}
         </ul>
         {{else}}
         <p>No comments yet. Be the first to comment!</p>
