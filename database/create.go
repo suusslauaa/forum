@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"log"
 )
 
 // ClearTable удаляет все записи из таблицы posts
@@ -47,9 +48,9 @@ func DeleteCategory(db *sql.DB, id int) error {
 }
 
 // CreatePost создает новый пост, привязанный к категории
-func CreatePost(db *sql.DB, title, content string, authorID, categoryID int, createdAt string) error {
-	query := `INSERT INTO posts (title, content, author_id, category_id, created_at) 
-			  VALUES (?, ?, ?, ?, ?);`
+func CreatePost(db *sql.DB, title, content string, authorID, categoryID int, createdAt, imagePath string) error {
+	query := `INSERT INTO posts (title, content, author_id, category_id, created_at, image_path) 
+			  VALUES (?, ?, ?, ?, ?, ?);`
 
 	// Используем подготовленный запрос для безопасности
 	stmt, err := db.Prepare(query)
@@ -58,9 +59,20 @@ func CreatePost(db *sql.DB, title, content string, authorID, categoryID int, cre
 	}
 	defer stmt.Close()
 	// Выполняем запрос
-	_, err = stmt.Exec(title, content, authorID, categoryID, createdAt)
+	log.Println("Executing query:", query)
+	log.Println("Params:", title, content, authorID, categoryID, createdAt, imagePath)
+
+	var imgPath interface{}
+	if imagePath == "" {
+		imgPath = nil
+	} else {
+		imgPath = imagePath
+	}
+
+	_, err = stmt.Exec(title, content, authorID, categoryID, createdAt, imgPath)
 	return err
 }
+
 func CreateUser(db *sql.DB, email, username, password string) error {
 	// SQL-запрос для вставки пользователя в таблицу
 	query := `INSERT INTO users (email, username, password) VALUES (?, ?, ?);`

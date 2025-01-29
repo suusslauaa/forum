@@ -44,6 +44,7 @@ func createTables(db *sql.DB) error {
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			liked INTEGER DEFAULT 0, -- Начальное значение лайков 0
 			disliked INTEGER DEFAULT 0, -- Начальное значение лайков 0
+			image_path TEXT, -- Добавляем поле для хранения пути к изображению
 			FOREIGN KEY (category_id) REFERENCES categories(id),
 			FOREIGN KEY (author_id) REFERENCES users(id)
 		);`,

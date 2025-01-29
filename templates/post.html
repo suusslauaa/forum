@@ -38,6 +38,9 @@
     <section class="post-container">
         <h1 class="post-title">{{.Post.Title}}</h1>
         <p class="post-content">{{.Post.Content}}</p>
+        {{if .Post.ImagePath}}
+        <img src="/{{.Post.ImagePath}}" alt="Post Image" class="post-image">
+        {{end}}      
         <p class="post-meta">Category: <span class="post-category">{{.Post.Category}}</span></p>
         <p class="post-meta">Posted by: <span class="post-author">{{.Post.Author}}</span></p>
         <div class="post-actions">

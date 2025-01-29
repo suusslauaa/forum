@@ -25,6 +25,7 @@ type Post struct {
 	Category     string
 	LikeCount    int
 	DislikeCount int
+	ImagePath    string
 	Comments     []Comment // Добавляем список комментариев
 }
 
@@ -41,6 +42,7 @@ func GetPostByID(db *sql.DB, postID int) (Post, error) {
 			IFNULL(c.name, '') AS category, 
 			p.liked AS like_count, 
 			p.disliked AS dislike_count, 
+			IFNULL(p.image_path, '') AS image,
 			p.author_id 
 		FROM posts p
 		LEFT JOIN categories c ON p.category_id = c.id
@@ -51,7 +53,7 @@ func GetPostByID(db *sql.DB, postID int) (Post, error) {
 	row := db.QueryRow(query, postID)
 
 	// Проверяем ошибку при сканировании
-	err := row.Scan(&post.ID, &post.Title, &post.Content, &post.Author, &post.CategoryID, &post.Category, &post.LikeCount, &post.DislikeCount, &post.AuthorID)
+	err := row.Scan(&post.ID, &post.Title, &post.Content, &post.Author, &post.CategoryID, &post.Category, &post.LikeCount, &post.DislikeCount, &post.ImagePath, &post.AuthorID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return post, errors.New("post not found")

@@ -3,9 +3,10 @@ package main
 import (
 	"forum/database"
 	"forum/handlers"
-	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"net/http"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
@@ -15,7 +16,6 @@ func main() {
 		log.Fatal(err)
 	}
 	defer db.Close()
-
 	// Создание категорий и постов (если нужно)
 	database.CreateCategory(db, "General")
 	database.CreateCategory(db, "Technology")
@@ -31,11 +31,14 @@ func main() {
 
 	// Настройка обработчиков HTTP
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
+	http.Handle("/uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir("uploads"))))
 	http.HandleFunc("/", handlers.HomeHandler)
 	http.HandleFunc("/register", handlers.RegisterHandler)
 	http.HandleFunc("/login", handlers.LoginHandler)
 	http.HandleFunc("/logout", handlers.LogoutHandler)
 	http.HandleFunc("/create-post", handlers.CreatePostHandler)
+	http.HandleFunc("/notifications", handlers.NotificationsHandler)
+	http.HandleFunc("/activity-page", handlers.ActivityPageHandler)
 	http.HandleFunc("/edit-post", handlers.EditPostHandler)
 	http.HandleFunc("/post", handlers.PostHandler)
 	http.HandleFunc("/my-posts", handlers.UserPostHandler)
