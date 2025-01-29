@@ -20,6 +20,9 @@
             <h1 class="form-title">Register an Account</h1>
             <form action="/register" method="POST">
                 <div class="form-group">
+                    {{ if .Check }}
+                    <p id="check" style="color: red;">{{ .Check }}</p>
+                    {{ end }}
                     <label for="username">Username</label>
                     <input type="text" id="username" name="username" placeholder="Enter your username" required>
                 </div>

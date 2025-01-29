@@ -21,7 +21,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		tmpl, err := template.ParseFiles("templates/login.html")
 		if err != nil {
-			http.Error(w, "Template parsing error", http.StatusInternalServerError)
+			ErrorHandler(w, "Template loading error", http.StatusInternalServerError)
 			return
 		}
 
@@ -35,7 +35,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		err = tmpl.Execute(w, data)
 		if err != nil {
-			http.Error(w, "Error rendering template", http.StatusInternalServerError)
+			ErrorHandler(w, "Error rendering template", http.StatusInternalServerError)
+			return
 		}
 		return
 	}
@@ -52,14 +53,14 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 		db, err := database.InitDB()
 		if err != nil {
-			http.Error(w, "Database error", http.StatusInternalServerError)
+			ErrorHandler(w, "Database connection error", http.StatusInternalServerError)
 			return
 		}
 		defer db.Close()
 
 		user, err := database.GetUserByEmail(db, email)
 		if err != nil {
-			http.Error(w, "Database error", http.StatusInternalServerError)
+			ErrorHandler(w, "Database connection error", http.StatusInternalServerError)
 			return
 		}
 

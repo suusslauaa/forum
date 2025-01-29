@@ -25,35 +25,40 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		// Получаем список категорий из базы данных
 		db, err := database.InitDB()
 		if err != nil {
-			http.Error(w, "Database connection error", http.StatusInternalServerError)
+			ErrorHandler(w, "Database connection error", http.StatusInternalServerError)
 			return
 		}
 		defer db.Close()
 
 		categories, err := database.GetCategories(db)
 		if err != nil {
-			http.Error(w, "Error fetching categories", http.StatusInternalServerError)
+			ErrorHandler(w, "Error fetching categories", http.StatusInternalServerError)
 			return
 		}
 
 		// Передаем категории в шаблон
 		tmpl, err := template.ParseFiles("templates/create_post.html")
 		if err != nil {
-			http.Error(w, "Template parsing error", http.StatusInternalServerError)
+			ErrorHandler(w, "Template parsing error", http.StatusInternalServerError)
 			return
 		}
 
 		data := struct {
 			UserID     int
 			Categories []database.Category
+			Check      string
 		}{
 			UserID:     loggedInUserID, // Получите ID пользователя из сессии
 			Categories: categories,
+			Check:      checker,
+		}
+		if checker != "" {
+			checker = ""
 		}
 
 		err = tmpl.Execute(w, data)
 		if err != nil {
-			http.Error(w, "Error rendering template", http.StatusInternalServerError)
+			ErrorHandler(w, "Error rendering template", http.StatusInternalServerError)
 			return
 		}
 		return
@@ -65,19 +70,20 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		userID := id[sessionID.Value]
 		categoryID, err := strconv.Atoi(r.FormValue("category"))
 		if err != nil {
-			http.Error(w, "Invalid category ID", http.StatusBadRequest)
+			ErrorHandler(w, "Invalid category ID", http.StatusBadRequest)
 			return
 		}
 
 		if title == "" || content == "" {
-			http.Error(w, "All fields are required", http.StatusBadRequest)
+			checker = "All fields are required"
+			http.Redirect(w, r, "/create-post", http.StatusSeeOther)
 			return
 		}
 
 		// Открываем соединение с базой данных
 		db, err := database.InitDB()
 		if err != nil {
-			http.Error(w, "Database connection error", http.StatusInternalServerError)
+			ErrorHandler(w, "Database connection error", http.StatusInternalServerError)
 			return
 		}
 		defer db.Close()
@@ -86,7 +92,7 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		createdAt := time.Now().Format("2006-01-02 15:04:05")
 		err = database.CreatePost(db, title, content, userID, categoryID, createdAt)
 		if err != nil {
-			http.Error(w, "Error saving post to database", http.StatusInternalServerError)
+			ErrorHandler(w, "Error saving post to database", http.StatusInternalServerError)
 			return
 		}
 

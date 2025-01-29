@@ -18,7 +18,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		// Рендерим HTML-форму для регистрации
 		tmpl, err := template.ParseFiles("templates/register.html")
 		if err != nil {
-			http.Error(w, "Ошибка загрузки шаблона", http.StatusInternalServerError)
+			ErrorHandler(w, "Template loading error", http.StatusInternalServerError)
 			return
 		}
 		tmpl.Execute(w, nil)
@@ -49,14 +49,14 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		// Хэшируем пароль
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 		if err != nil {
-			http.Error(w, "Ошибка при хэшировании пароля", http.StatusInternalServerError)
+			ErrorHandler(w, "H loading error", http.StatusInternalServerError)
 			return
 		}
 
 		// Вставка данных в базу
 		db, err := database.InitDB()
 		if err != nil {
-			http.Error(w, "Ошибка подключения к базе данных", http.StatusInternalServerError)
+			ErrorHandler(w, "Database connection error", http.StatusInternalServerError)
 			return
 		}
 		defer db.Close()
@@ -66,7 +66,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			req.Email, req.Username, hashedPassword,
 		)
 		if err != nil {
-			http.Error(w, "Ошибка при создании пользователя", http.StatusInternalServerError)
+			ErrorHandler(w, "Error when creating a user", http.StatusInternalServerError)
 			return
 		}
 
@@ -74,6 +74,5 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
-
-	http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
+	ErrorHandler(w, "The method is not supported", http.StatusInternalServerError)
 }

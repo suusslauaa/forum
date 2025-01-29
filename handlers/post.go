@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"database/sql"
-	"fmt"
 	"forum/database"
 	"github.com/gofrs/uuid"
 	"html/template"
@@ -15,7 +14,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 	// Проверка сессии
 	sessionID, err := getSessionID(w, r)
 	if err != nil {
-		http.Error(w, "Session error", http.StatusInternalServerError)
+		ErrorHandler(w, "Session error", http.StatusInternalServerError)
 		return
 	}
 
@@ -27,20 +26,20 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 	// Получаем ID поста из параметров URL
 	postIDStr := r.URL.Query().Get("id")
 	if postIDStr == "" {
-		http.Error(w, "Post ID is required", http.StatusBadRequest)
+		ErrorHandler(w, "Post ID is required", http.StatusBadRequest)
 		return
 	}
 
 	postID, err := strconv.Atoi(postIDStr)
 	if err != nil {
-		http.Error(w, "Invalid post ID", http.StatusBadRequest)
+		ErrorHandler(w, "Invalid post ID", http.StatusBadRequest)
 		return
 	}
 
 	// Открываем соединение с базой данных
 	db, err := database.InitDB()
 	if err != nil {
-		http.Error(w, "Database connection error", http.StatusInternalServerError)
+		ErrorHandler(w, "Database connection error", http.StatusInternalServerError)
 		return
 	}
 	defer db.Close()
@@ -48,7 +47,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 	// Получаем пост из базы данных
 	post, err := database.GetPostByID(db, postID)
 	if err != nil {
-		http.Error(w, "Post not found", http.StatusNotFound)
+		ErrorHandler(w, "Post not found", http.StatusNotFound)
 		return
 	}
 
@@ -58,9 +57,10 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 	// Проверяем, является ли текущий пользователь автором поста
 	creator := post.AuthorID == UserID
 
-	// Обрабатываем POST запрос для добавления комментария
+	// Обрабатываем POST-запрос для добавления комментария
 	if r.Method == http.MethodPost && loggedIn {
 		if err := handlePostActions(w, r, db, postID, creator, UserID); err != nil {
+			ErrorHandler(w, "Error handling post action", http.StatusInternalServerError)
 			return
 		}
 
@@ -72,7 +72,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 	// Загружаем шаблон и передаем данные
 	tmpl, err := template.ParseFiles("templates/post.html")
 	if err != nil {
-		http.Error(w, "Template parsing error", http.StatusInternalServerError)
+		ErrorHandler(w, "Template parsing error", http.StatusInternalServerError)
 		return
 	}
 
@@ -93,7 +93,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = tmpl.Execute(w, datas)
 	if err != nil {
-		http.Error(w, "Error rendering template", http.StatusInternalServerError)
+		ErrorHandler(w, "Error rendering template", http.StatusInternalServerError)
 		return
 	}
 }
@@ -117,36 +117,36 @@ func handlePostActions(w http.ResponseWriter, r *http.Request, db *sql.DB, postI
 	switch action {
 	case "like":
 		if err := database.ToggleLike(db, postID, userID); err != nil {
-			http.Error(w, "Error processing like", http.StatusInternalServerError)
+			ErrorHandler(w, "Error processing like", http.StatusInternalServerError)
 			return err
 		}
 	case "dislike":
 		if err := database.ToggleDislike(db, postID, userID); err != nil {
-			http.Error(w, "Error processing dislike", http.StatusInternalServerError)
+			ErrorHandler(w, "Error processing dislike", http.StatusInternalServerError)
 			return err
 		}
 	case "delete":
 		if !creator {
-			http.Error(w, "You are not the creator of this post", http.StatusForbidden)
+			ErrorHandler(w, "You are not the creator of this post", http.StatusForbidden)
 			return nil
 		}
 		if err := database.DeletePost(db, postID); err != nil {
-			http.Error(w, "Error deleting post", http.StatusInternalServerError)
+			ErrorHandler(w, "Error deleting post", http.StatusInternalServerError)
 			return err
 		}
 		http.Redirect(w, r, "/my-posts", http.StatusSeeOther)
 	case "comment":
 		commentText := r.FormValue("content")
 		if commentText == "" {
-			http.Error(w, "Comment text is required", http.StatusBadRequest)
+			ErrorHandler(w, "Comment text is required", http.StatusBadRequest)
 			return nil
 		}
 		if err := database.AddComment(db, postID, userID, commentText); err != nil {
-			http.Error(w, "Error adding comment", http.StatusInternalServerError)
+			ErrorHandler(w, "Error adding comment", http.StatusInternalServerError)
 			return err
 		}
 	default:
-		http.Error(w, "Invalid action", http.StatusBadRequest)
+		ErrorHandler(w, "Invalid action", http.StatusBadRequest)
 		return nil
 	}
 
@@ -155,15 +155,9 @@ func handlePostActions(w http.ResponseWriter, r *http.Request, db *sql.DB, postI
 
 func UserPostHandler(w http.ResponseWriter, r *http.Request) {
 	// Получаем сессию
-	sessionID, err := r.Cookie("session_id")
+	sessionID, err := getSessionID(w, r)
 	if err != nil {
-		// Если сессии нет
-		sessionID = &http.Cookie{
-			Name:  "session_id",
-			Value: uuid.Must(uuid.NewV4()).String(),
-		}
-		http.SetCookie(w, sessionID)
-		http.Error(w, "User is not logged in", http.StatusUnauthorized)
+		ErrorHandler(w, "Session error", http.StatusInternalServerError)
 		return
 	}
 
@@ -177,28 +171,29 @@ func UserPostHandler(w http.ResponseWriter, r *http.Request) {
 	// Получаем ID пользователя по имени
 	UserID, ok := id[sessionID.Value]
 	if !ok {
-		http.Error(w, "User not found", http.StatusUnauthorized)
+		ErrorHandler(w, "User not found", http.StatusUnauthorized)
 		return
 	}
 
 	// Открываем соединение с базой данных
 	db, err := database.InitDB()
 	if err != nil {
-		http.Error(w, "Database connection error", http.StatusInternalServerError)
+		ErrorHandler(w, "Database connection error", http.StatusInternalServerError)
 		return
 	}
 	defer db.Close()
 
+	// Получаем посты пользователя
 	posts, err := database.GetPostsByUserID(db, UserID)
 	if err != nil {
-		http.Error(w, "Error retrieving user's posts", http.StatusInternalServerError)
+		ErrorHandler(w, "Error retrieving user's posts", http.StatusInternalServerError)
 		return
 	}
 
 	// Загружаем шаблон для отображения постов
 	tmpl, err := template.ParseFiles("templates/my_posts.html")
 	if err != nil {
-		http.Error(w, "Template parsing error", http.StatusInternalServerError)
+		ErrorHandler(w, "Template parsing error", http.StatusInternalServerError)
 		return
 	}
 
@@ -218,7 +213,7 @@ func UserPostHandler(w http.ResponseWriter, r *http.Request) {
 	// Рендерим шаблон
 	err = tmpl.Execute(w, data)
 	if err != nil {
-		http.Error(w, "Error rendering template", http.StatusInternalServerError)
+		ErrorHandler(w, "Error rendering template", http.StatusInternalServerError)
 		return
 	}
 }
@@ -226,6 +221,10 @@ func UserPostHandler(w http.ResponseWriter, r *http.Request) {
 func LikePostHandler(w http.ResponseWriter, r *http.Request) {
 	// Получаем сессию
 	sessionID, err := getSessionID(w, r)
+	if err != nil {
+		ErrorHandler(w, "Error retrieving session", http.StatusUnauthorized)
+		return
+	}
 
 	// Проверяем, авторизован ли пользователь
 	username, loggedIn := store[sessionID.Value]
@@ -237,28 +236,29 @@ func LikePostHandler(w http.ResponseWriter, r *http.Request) {
 	// Получаем ID пользователя по имени
 	UserID, ok := id[sessionID.Value]
 	if !ok {
-		http.Error(w, "User not found", http.StatusUnauthorized)
+		ErrorHandler(w, "User not found", http.StatusUnauthorized)
 		return
 	}
 
 	// Открываем соединение с базой данных
 	db, err := database.InitDB()
 	if err != nil {
-		http.Error(w, "Database connection error", http.StatusInternalServerError)
+		ErrorHandler(w, "Database connection error", http.StatusInternalServerError)
 		return
 	}
 	defer db.Close()
 
+	// Получаем посты, которые пользователь лайкнул
 	posts, err := database.GetLikedPostsByUserID(db, UserID)
 	if err != nil {
-		http.Error(w, "Error retrieving user's posts", http.StatusInternalServerError)
+		ErrorHandler(w, "Error retrieving user's liked posts", http.StatusInternalServerError)
 		return
 	}
-	fmt.Println(posts)
+
 	// Загружаем шаблон для отображения постов
 	tmpl, err := template.ParseFiles("templates/my_posts.html")
 	if err != nil {
-		http.Error(w, "Template parsing error", http.StatusInternalServerError)
+		ErrorHandler(w, "Template parsing error", http.StatusInternalServerError)
 		return
 	}
 
@@ -278,8 +278,7 @@ func LikePostHandler(w http.ResponseWriter, r *http.Request) {
 	// Рендерим шаблон
 	err = tmpl.Execute(w, data)
 	if err != nil {
-		http.Error(w, "Error rendering template", http.StatusInternalServerError)
+		ErrorHandler(w, "Error rendering template", http.StatusInternalServerError)
 		return
 	}
-
 }

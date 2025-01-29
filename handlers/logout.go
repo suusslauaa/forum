@@ -9,7 +9,7 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	// Получаем session_id из cookies
 	sessionID, err := r.Cookie("session_id")
 	if err != nil {
-		http.Error(w, "Ошибка сессии", http.StatusInternalServerError)
+		ErrorHandler(w, "Ошибка сессии", http.StatusInternalServerError)
 		return
 	}
 

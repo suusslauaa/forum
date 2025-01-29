@@ -27,6 +27,9 @@
     <main>
         <section class="content">
             <h1 class="page-title">Create a New Post</h1>
+            {{ if .Check }}
+            <p id="check" style="color: red;">{{ .Check }}</p>
+            {{ end }}
             <form action="/create-post" method="POST" class="create-post-form">
                 <label for="title" class="form-label">Post Title:</label>
                 <input type="text" id="title" name="title" class="form-input" placeholder="Enter your post title" required>
