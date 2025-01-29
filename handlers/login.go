@@ -14,62 +14,69 @@ type LoginRequest struct {
 	Password string `json:"password"`
 }
 
+var checker string
+
 // LoginHandler обрабатывает запросы на логин
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	// Если метод запроса не POST, рендерим HTML-форму для логина
 	if r.Method == http.MethodGet {
-		// Открываем HTML-шаблон
 		tmpl, err := template.ParseFiles("templates/login.html")
 		if err != nil {
 			http.Error(w, "Template parsing error", http.StatusInternalServerError)
 			return
 		}
 
-		// Рендерим шаблон
-		err = tmpl.Execute(w, nil)
+		data := struct {
+			Check string
+		}{
+			Check: checker,
+		}
+		if checker != "" {
+			checker = ""
+		}
+		err = tmpl.Execute(w, data)
 		if err != nil {
 			http.Error(w, "Error rendering template", http.StatusInternalServerError)
-			return
 		}
 		return
 	}
 
-	// Обработка POST-запроса для логина
 	if r.Method == http.MethodPost {
 		email := r.FormValue("email")
 		password := r.FormValue("password")
 
 		if email == "" || password == "" {
-			http.Error(w, "Email and password are required", http.StatusBadRequest)
+			checker = "Email and password are required"
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
 
-		db, err := database.InitDB() // Получаем соединение с базой данных
+		db, err := database.InitDB()
 		if err != nil {
 			http.Error(w, "Database error", http.StatusInternalServerError)
 			return
 		}
 		defer db.Close()
 
-		user, err := database.GetUserByEmail(db, email) // Получаем пользователя из БД по email
+		user, err := database.GetUserByEmail(db, email)
 		if err != nil {
 			http.Error(w, "Database error", http.StatusInternalServerError)
 			return
 		}
 
-		if user == nil { // Пользователь не найден
-			http.Error(w, "Invalid email or password", http.StatusUnauthorized) // 401 Unauthorized
+		if user == nil {
+			checker = "Invalid email and password"
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
 
-		// Проверяем пароль с помощью bcrypt
 		err = database.ComparePassword(user.PasswordHash, password)
-		if err != nil { // Пароль не совпадает
-			http.Error(w, "Invalid email or password", http.StatusUnauthorized) // 401 Unauthorized
+		if err != nil {
+			checker = "Invalid email and password"
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
 
-		// Аутентификация успешна! Теперь устанавливаем сессию
+		// Успешная аутентификация
 		sessionIDCookie, err := r.Cookie("session_id")
 		var sessionID string
 		if err != nil {

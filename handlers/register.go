@@ -36,11 +36,13 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		// Проверка, существует ли уже email
 		emailExists, err := database.CheckEmailExists(req.Email)
 		if err != nil {
-			http.Error(w, "Ошибка проверки email", http.StatusInternalServerError)
+			checker = "Email verification error"
+			http.Redirect(w, r, "/register", http.StatusSeeOther)
 			return
 		}
 		if emailExists {
-			http.Error(w, "Email уже используется", http.StatusConflict)
+			checker = "Email is already in use"
+			http.Redirect(w, r, "/register", http.StatusSeeOther)
 			return
 		}
 
