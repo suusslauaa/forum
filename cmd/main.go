@@ -43,6 +43,12 @@ func main() {
 	http.HandleFunc("/post", handlers.PostHandler)
 	http.HandleFunc("/my-posts", handlers.UserPostHandler)
 	http.HandleFunc("/liked-posts", handlers.LikePostHandler)
+
+	http.HandleFunc("/google/login", handlers.GoogleLogin)
+	http.HandleFunc("/callback", handlers.GoogleCallback)
+	http.HandleFunc("/github/login", handlers.GitHubLogin)
+	http.HandleFunc("/github/callback", handlers.GitHubCallback)
+
 	// Запуск сервера
 	log.Println("Сервер запущен на http://localhost:4000")
 	log.Fatal(http.ListenAndServe(":4000", nil))
