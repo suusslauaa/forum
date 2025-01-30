@@ -81,16 +81,12 @@ func EditPostHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		data := map[string]interface{}{
-			"Username": username,
-			"Moders":   Moders,
-			"UserId":   loggedInUserID,
-			"Admin":    admin,
-			"Category": categories,
-			"Check":    checker,
-			"post":     post,
-		}
-		if checker != "" {
-			checker = ""
+			"Username":   username,
+			"Moders":     Moders,
+			"UserID":     loggedInUserID,
+			"Admin":      admin,
+			"Categories": categories,
+			"Post":       post,
 		}
 		err = tmpl.Execute(w, data)
 		if err != nil {
