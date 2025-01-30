@@ -8,48 +8,44 @@
 </head>
 <body>
 <header>
-    {{if .LoggedIn}}
-    <nav class="nav">
-        <a href="/" class="auth-link">Home</a>
-        <a href="/my-posts" class="auth-link">My Posts</a>
-        <a href="/liked-posts" class="auth-link">Liked Posts</a>
-        {{if or .Moder .Admin}}
-        {{else}}
-        <a href="/gomoder" class="auth-link">Want Moder</a>
-        {{end}}
-        {{if .Admin}}
-        <a href="/reports" class="auth-link">Reports</a>
-        <a href="/requests" class="auth-link">Request</a>
-        <a href="/categories" class="auth-link">Category</a>
-        <a href="/users" class="auth-link">Users</a>
-        {{end}}
-    </nav>
-    <h1>SOSAL?</h1>
-    <div class="create-post">
-        <div class="nav2">
+    <div class="forum">
+        <a href="/">FORUM</a>
+    </div>
+    <div class="heddy">
+        <div class="left">
+            {{if .LoggedIn}}
+            <a href="/my-posts" class="auth-link">My Posts</a>
+            <a href="/liked-posts" class="auth-link">Liked Posts</a>
+            {{if or .Moder .Admin}}
+            {{else}}
+            <a href="/gomoder" class="auth-link">Want Moder</a>
+            {{end}}
+            {{if .Admin}}
+            <a href="/reports" class="auth-link">Reports</a>
+            <a href="/requests" class="auth-link">Request</a>
+            <a href="/categories" class="auth-link">Category</a>
+            <a href="/users" class="auth-link">Users</a>
+            {{end}}
+            {{end}}
+        </div>
+        <div class="right">
+            {{if .LoggedIn}}
             <a href="/create-post" class="auth-link">Create Post</a>
-        </div>
-        <div class="nav2">
             <a href="/notifications" class="auth-link">Notifications</a>
-        </div>      
-        <div class="nav2">
             <a href="/activity-page" class="auth-link">Activity Page</a>
-        </div>                       
-        <div class="circle">{{.Username}}
-            <div class="dropdown">
-                <a href="/logout" class="dropdown-link">Logout</a>
+            <div class="user-menu">
+                <div class="circle">{{.Username}}
+                    <div class="dropdown">
+                        <a href="/logout" class="dropdown-link">Logout</a>
+                    </div>
+                </div>
             </div>
+            {{else}}
+            <a href="/register" class="auth-link">Register</a>
+            <a href="/login" class="auth-link">Login</a>
+            {{end}}
         </div>
     </div>
-    {{else}}
-    <nav class="nav">
-        <a href="/" class="auth-link">Home</a>
-    </nav>
-    <div class="nav2">
-        <a href="/register" class="auth-link">Register</a>
-        <a href="/login" class="auth-link">Login</a>
-    </div>
-    {{end}}
 </header>
 
 <main>
@@ -60,12 +56,14 @@
             <article class="post">
                 <h2 class="post-title">{{.Title}}</h2>
                 <p class="post-content">{{.Content}}</p>
-                <span class="post-category">{{.Category}}</span>
+                {{if .Category}}
+                <span class="category-tag">{{.Category}}</span>
+                {{end}}
             </article>
         </a>
         {{end}}
         {{else}}
-        <p>No posts found.</p>
+        <p class="no-posts">No posts found.</p>
         {{end}}
     </section>
 </main>

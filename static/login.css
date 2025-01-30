@@ -1,63 +1,83 @@
-/* Сброс стилей */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
+/* Общие стили */
 body {
     font-family: Arial, sans-serif;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    background-color: #f9f9f9;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+    line-height: 1.6;
 }
 
-/* Стиль для header */
 header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 20px;
+    width: 100%;
     background-color: #007bff;
     color: white;
-}
-
-header .nav a {
-    color: white;
-    text-decoration: none;
-    margin-right: 15px;
-}
-
-header .nav2 a {
-    color: white;
-    text-decoration: none;
-    margin-right: 15px;
-}
-
-/* Основной блок */
-main {
+    padding: 15px 20px;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
-    flex: 1;
-    background-color: #f0f2f5;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-/* Форма регистрации */
+.heddy {
+    display: flex;
+    justify-content: flex-end; /* Ссылки справа */
+    width: 90%;
+    max-width: 1200px;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.forum {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.forum a {
+    color: white;
+    text-decoration: none;
+    font-size: 28px;
+    font-weight: bold;
+    transition: opacity 0.3s;
+}
+
+.forum a:hover {
+    opacity: 0.8;
+}
+
+.right {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.right a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    transition: opacity 0.3s;
+}
+
+.right a:hover {
+    opacity: 0.8;
+}
+
+/* Форма входа */
 .login-form {
-    background-color: white;
-    padding: 30px;
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    background: white;
     border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 400px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     text-align: center;
 }
 
 .form-title {
-    font-size: 1.8em;
+    font-size: 24px;
     margin-bottom: 20px;
-    color: #333;
+    color: #007bff;
 }
 
 .form-group {
@@ -68,98 +88,71 @@ main {
 .form-group label {
     display: block;
     margin-bottom: 5px;
-    font-size: 14px;
-    color: #555;
+    font-weight: bold;
+    color: #333;
 }
 
 .form-group input {
-    width: 100%;
+    width: calc(100% - 22px); /* Учитываем padding и border */
     padding: 10px;
-    font-size: 14px;
-    border: 1px solid #ccc;
+    border: 1px solid #ddd;
     border-radius: 5px;
-    outline: none;
-    transition: border-color 0.3s ease;
+    font-size: 16px;
+    transition: border-color 0.3s;
 }
 
 .form-group input:focus {
     border-color: #007bff;
+    outline: none;
 }
 
 .submit-button {
+    width: 100%;
+    padding: 10px;
     background-color: #007bff;
     color: white;
-    padding: 10px 15px;
-    font-size: 16px;
     border: none;
     border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
     cursor: pointer;
-    transition: background-color 0.3s ease;
-    width: 100%;
+    transition: background-color 0.3s;
 }
 
 .submit-button:hover {
-    background-color: #0056b3;
+    background-color: #005bb5;
 }
 
-.auth-link {
-    display: inline-block;
-    padding: 10px 20px;
-    font-size: 1em;
-    font-weight: bold;
-    color: white;
+/* Социальные кнопки */
+.social-auth {
+    margin-top: 20px;
+}
+
+.social-link {
+    display: block;
+    padding: 10px;
+    margin: 10px 0;
+    background-color: #f4f4f4;
+    color: #333;
     text-decoration: none;
-    background-color: #007bff;
     border-radius: 5px;
-    transition: background-color 0.3s ease, transform 0.2s, box-shadow 0.2s;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    margin-right: 10px; /* Расстояние между кнопками */
+    font-weight: bold;
+    transition: background-color 0.3s;
 }
 
-/* Эффекты при наведении и нажатии */
-.auth-link:hover {
-    background-color: #0056b3;
-    transform: translateY(-3px);
-    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+.social-link:hover {
+    background-color: #ddd;
 }
 
-.auth-link:active {
-    transform: translateY(1px);
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
-}
+/* Адаптивность */
+@media (max-width: 768px) {
+    .heddy {
+        flex-direction: column;
+        gap: 10px;
+    }
 
-/* Фиксированный хедер */
-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 70px; /* Высота хедера */
-    background-color: #007bff;
-    color: white;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 20px;
-    z-index: 1000; /* Чтобы хедер был сверху */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-}
-
-/* Отступ для основного содержимого */
-main {
-    margin-top: 70px; /* Отступ равен высоте хедера */
-}
-
-/* Стили для сайдбара и контента */
-.sidebar {
-    width: 25%;
-    background-color: #e9ecef;
-    padding: 15px;
-    border-radius: 10px;
-    margin-right: 20px;
-}
-
-.content {
-    width: 75%;
-    padding: 20px;
+    .login-form {
+        margin: 20px auto;
+        padding: 15px;
+    }
 }

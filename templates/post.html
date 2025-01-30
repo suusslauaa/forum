@@ -7,139 +7,140 @@
     <link rel="stylesheet" href="../static/post.css">
 </head>
 <body>
-<header>
-    {{if .LoggedIn}}
-    <nav class="nav">
-        <a href="/" class="auth-link">Home</a>
-        <a href="/my-posts" class="auth-link">My Posts</a>
-        <a href="/liked-posts" class="auth-link">Liked Posts</a>
-        {{if or .Moder .Admin}}
-        {{else}}
-        <a href="/gomoder" class="auth-link">Want Moder</a>
-        {{end}}
-        {{if .Admin}}
-        <a href="/reports" class="auth-link">Reports</a>
-        <a href="/requests" class="auth-link">Request</a>
-        <a href="/categories" class="auth-link">Category</a>
-        <a href="/users" class="auth-link">Users</a>
-        {{end}}
-    </nav>
-    <div class="create-post">
-        <a href="/create-post" class="auth-link">Create Post</a>
-        <a href="/notifications" class="auth-link">Notifications</a>
-        <a href="/activity-page" class="auth-link">Activity Page</a>   
-        <div class="circle">{{.Username}}
-            <div class="dropdown">
-                <a href="/logout" class="dropdown-link">Logout</a>
-            </div>
+    <header>
+        <div class="forum">
+            <a href="/">FORUM</a>
         </div>
-    </div>
-    {{else}}
-    <nav class="nav">
-        <a href="/" class="auth-link">Home</a>
-    </nav>
-    <div class="nav2">
-        <a href="/register" class="auth-link">Register</a>
-        <a href="/login" class="auth-link">Login</a>
-    </div>
-    {{end}}
-</header>
-<main>
-    <section class="post-container">
-        <h1 class="post-title">{{.Post.Title}}</h1>
-        <p class="post-content">{{.Post.Content}}</p>
-        {{if .Post.ImagePath}}
-        <img src="/{{.Post.ImagePath}}" alt="Post Image" class="post-image" style="max-width: 300px; max-height: 300px;">
-        {{end}}      
-        <p class="post-meta">Category: <span class="post-category">{{.Post.Category}}</span></p>
-        <p class="post-meta">Posted by: <span class="post-author">{{.Post.Author}}</span></p>
-        {{if .LoggedIn}}
-        <div class="post-actions">
-            <div class="actions-left">
-                <form method="post" action="/post?action=like&id={{.Post.ID}}">
-                    <button type="submit" class="like-button">Like ({{.Post.LikeCount}})</button>
-                </form>
-
-                <form method="post" action="/post?action=dislike&id={{.Post.ID}}">
-                    <button type="submit" class="dislike-button">Dislike ({{.Post.DislikeCount}})</button>
-                </form>
+        <nav class="heddy">
+            <div class="left">
+                {{if .LoggedIn}}
+                <a href="/my-posts">My Posts</a>
+                <a href="/liked-posts">Liked Posts</a>
+                {{if or .Moder .Admin}}
+                {{else}}
+                <a href="/gomoder">Want Moder</a>
+                {{end}}
+                {{if .Admin}}
+                <a href="/reports">Reports</a>
+                <a href="/requests">Request</a>
+                <a href="/categories">Category</a>
+                <a href="/users">Users</a>
+                {{end}}
+                {{end}}
             </div>
-            {{if or .Creator .Moder}}
-            <div class="actions-right">
-                <button type="submit" class="delete-button">
-                    <a href="/edit-post?id={{.Post.ID}}" class="xxx">Edit</a>
-                </button>
-                <form method="post" action="/post?action=delete&id={{.Post.ID}}">
-                    <button type="submit" class="delete-button">Delete</button>
-                </form>
-                {{if .Moder}}
-                <div class="actions-right">
-                    <form method="post" action="/post?action=report&id={{.Post.ID}}">
-                        <button type="submit" class="delete-button">Report</button>
+            <div class="right">
+                {{if .LoggedIn}}
+                <a href="/create-post">Create Post</a>
+                <a href="/notifications">Notifications</a>
+                <a href="/activity-page">Activity Page</a>
+                <div class="user-menu">
+                    <div class="circle">
+                        {{.Username}}
+                        <div class="dropdown">
+                            <a href="/logout">Logout</a>
+                        </div>
+                    </div>
+                </div>
+                {{else}}
+                <a href="/register">Register</a>
+                <a href="/login">Login</a>
+                {{end}}
+            </div>
+        </nav>
+    </header>
+    <main>
+        <section class="post-container">
+            <h1 class="post-title">{{.Post.Title}}</h1>
+            <p class="post-content">{{.Post.Content}}</p>
+            {{if .Post.ImagePath}}
+            <img src="/{{.Post.ImagePath}}" alt="Post Image" class="post-image">
+            {{end}}      
+            <p class="post-meta">Category: <span class="post-category">{{.Post.Category}}</span></p>
+            <p class="post-meta">Posted by: <span class="post-author">{{.Post.Author}}</span></p>
+            {{if .LoggedIn}}
+            <div class="post-actions">
+                <div class="actions-left">
+                    <form method="post" action="/post?action=like&id={{.Post.ID}}">
+                        <button type="submit" class="like-button">Like ({{.Post.LikeCount}})</button>
                     </form>
+                    <form method="post" action="/post?action=dislike&id={{.Post.ID}}">
+                        <button type="submit" class="dislike-button">Dislike ({{.Post.DislikeCount}})</button>
+                    </form>
+                </div>
+                {{if or .Creator .Moder}}
+                <div class="actions-right">
+                    <a href="/edit-post?id={{.Post.ID}}" class="edit-button">Edit</a>
+                    <form method="post" action="/post?action=delete&id={{.Post.ID}}">
+                        <button type="submit" class="delete-button">Delete</button>
+                    </form>
+                    {{if .Moder}}
+                    <form method="post" action="/post?action=report&id={{.Post.ID}}">
+                        <button type="submit" class="report-button">Report</button>
+                    </form>
+                    {{end}}
                 </div>
                 {{end}}
             </div>
+            {{else}}
+            <div class="post-actions">
+                <div class="actions-left">
+                    <button type="submit" class="like-button">Like ({{.Post.LikeCount}})</button>
+                    <button type="submit" class="dislike-button">Dislike ({{.Post.DislikeCount}})</button>
+                </div>
+            </div>
             {{end}}
-        </div>
-        {{else}}
-        <div class="post-actions">
-            <div class="actions-left">
-                <button type="submit" class="like-button">Like ({{.Post.LikeCount}})</button>
-                <button type="submit" class="dislike-button">Dislike ({{.Post.DislikeCount}})</button>
-            </div>
-        </div>
-        {{end}}
-    </section>
+        </section>
 
-    <!-- Comments Section -->
-    <section class="comments-section">
-        <h2>Comments</h2>
-        {{if .Post.Comments}}
-        <ul class="comments-list">
-            {{range .Comments }}
-            <div>
-                <p>{{ .Author }}: {{ .Content }}</p>
-                {{if $.LoggedIn}}
-                <form method="post" action="/comment?id={{.ID}}&action=like">
-                    <button type="submit">Like ({{ .LikeCount }})</button>
-                </form> 
-                <form method="post" action="/comment?id={{.ID}}&action=dislike">
-                    <button type="submit">Dislike ({{ .DislikeCount }})</button>
-                </form>  
-                {{if eq .UserID $.SessionUserID}}
-                <form method="post" action="/comment?id={{.ID}}&action=update">
-                    <input type="text" name="content" value="{{ .Content }}">
-                    <button type="submit">Update</button>
-                </form>
-                {{end}}
-                {{if or (eq .UserID $.SessionUserID) (eq $.UserRole "moderator") (eq $.UserRole "admin")}}
-                <form method="post" action="/comment?id={{.ID}}&action=delete">
-                    <button type="submit">Delete</button>
-                </form>
-                {{end}}
+        <!-- Comments Section -->
+        <section class="comments-section">
+            <h2>Comments</h2>
+            {{if .Post.Comments}}
+            <ul class="comments-list">
+                {{range .Comments }}
+                <li class="comment-item">
+                    <p class="comment-author">{{ .Author }}:</p>
+                    <p class="comment-content">{{ .Content }}</p>
+                    {{if $.LoggedIn}}
+                    <div class="comment-actions">
+                        <form method="post" action="/comment?id={{.ID}}&action=like">
+                            <button type="submit" class="like-button">Like ({{ .LikeCount }})</button>
+                        </form> 
+                        <form method="post" action="/comment?id={{.ID}}&action=dislike">
+                            <button type="submit" class="dislike-button">Dislike ({{ .DislikeCount }})</button>
+                        </form>  
+                        {{if eq .UserID $.SessionUserID}}
+                        <form method="post" action="/comment?id={{.ID}}&action=update">
+                            <input type="text" name="content" value="{{ .Content }}">
+                            <button type="submit" class="update-button">Update</button>
+                        </form>
+                        {{end}}
+                        {{if or (eq .UserID $.SessionUserID) (eq $.UserRole "moderator") (eq $.UserRole "admin")}}
+                        <form method="post" action="/comment?id={{.ID}}&action=delete">
+                            <button type="submit" class="delete-button">Delete</button>
+                        </form>
+                        {{end}}
+                    </div>
+                    {{else}}
+                    <p>👍 Like ({{ .LikeCount }})</p>
+                    <p>👎 Dislike ({{ .DislikeCount }})</p>
+                    {{end}}
+                </li>
+                {{ end }}
+            </ul>
+            {{else}}
+            <p>No comments yet. Be the first to comment!</p>
+            {{end}}
 
-                {{else}}
-                <p>👍 Like</a> ({{ .LikeCount }})
-                <p>👎 Dislike</a> ({{ .DislikeCount }}) 
-                {{end}}
-            </div>
-            {{ end }}
-        </ul>
-        {{else}}
-        <p>No comments yet. Be the first to comment!</p>
-        {{end}}
-
-        <!-- Add Comment Form -->
-        {{if .LoggedIn}}
-        <form method="post" action="/post?action=comment&id={{.Post.ID}}">
-            <textarea name="content" placeholder="Add a comment..." required></textarea>
-            <button type="submit" class="comment-button">Post Comment</button>
-        </form>
-        {{else}}
-        <p>You must be logged in to post a comment. <a href="/login">Login</a> or <a href="/register">Register</a>.</p>
-        {{end}}
-    </section>
-</main>
+            <!-- Add Comment Form -->
+            {{if .LoggedIn}}
+            <form method="post" action="/post?action=comment&id={{.Post.ID}}" class="comment-form">
+                <textarea name="content" placeholder="Add a comment..." required></textarea>
+                <button type="submit" class="comment-button">Post Comment</button>
+            </form>
+            {{else}}
+            <p>You must be logged in to post a comment. <a href="/login">Login</a> or <a href="/register">Register</a>.</p>
+            {{end}}
+        </section>
+    </main>
 </body>
 </html>

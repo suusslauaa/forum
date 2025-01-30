@@ -1,15 +1,18 @@
 <!DOCTYPE html>
-<link rel="stylesheet" href="../static/notifications.css">
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Post Page</title>
+    <link rel="stylesheet" href="../static/notifications.css">
+    <title>Notifications</title>
 </head>
 <body>
-    <header>
-        <nav class="nav">
-            <a href="/" class="auth-link">Home</a>
+<header>
+    <div class="forum">
+        <a href="/">FORUM</a>
+    </div>
+    <div class="heddy">
+        <div class="left">
             <a href="/my-posts" class="auth-link">My Posts</a>
             <a href="/liked-posts" class="auth-link">Liked Posts</a>
             {{if or .Moder .Admin}}
@@ -22,44 +25,43 @@
             <a href="/categories" class="auth-link">Category</a>
             <a href="/users" class="auth-link">Users</a>
             {{end}}
-        </nav>
-        <h1>SOSAL?</h1>
-        <div class="create-post">
-            <div class="nav2">
-                <a href="/create-post" class="auth-link">Create Post</a>
-            </div>   
-            <div class="nav2">
-                <a href="/notifications/read" class="auth-link">Archive</a>
-            </div> 
-            <div class="nav2">
-                <a href="/activity-page" class="auth-link">Activity Page</a>
-            </div>                                         
-            <div class="circle">{{.Username}}
-                <div class="dropdown">
-                    <a href="/logout" class="dropdown-link">Logout</a>
+        </div>
+        <div class="right">
+            <a href="/create-post" class="auth-link">Create Post</a>
+            <a href="/notifications/read" class="auth-link">Archive</a>
+            <a href="/activity-page" class="auth-link">Activity Page</a>
+            <div class="user-menu">
+                <div class="circle">{{.Username}}
+                    <div class="dropdown">
+                        <a href="/logout" class="dropdown-link">Logout</a>
+                    </div>
                 </div>
             </div>
         </div>
-    </header>
-    <main>
+    </div>
+</header>
+
+<main>
+    <h1 class="page-title">Notifications</h1>
+    <section class="notifications-container">
         {{range .Activities}}
-        <div class="post-container">
-            {{if .IsRead}}
-            {{else}}
-            <div class="post-title">{{.Type}}</div>
+        {{if not .IsRead}}
+        <div class="notification-item">
+            <div class="notification-type">{{.Type}}</div>
             <div class="timestamp">Created At: {{.CreatedAt}}</div>
             {{if .CommentContent}}
-            <p>Comment: {{.CommentContent}}</p>
+            <p class="comment-content">Comment: {{.CommentContent}}</p>
             {{end}}
             {{if .PostID}}
-            <a href="/post?id={{.PostID}}" class="post-content">View Post</a>
+            <a href="/post?id={{.PostID}}" class="post-link">View Post</a>
             <form method="post" action="/notifications?action=read&id={{.ID}}">
-                <button type="submit" class="delete-button">Mark as Read</button>
+                <button type="submit" class="mark-as-read-button">Mark as Read</button>
             </form>
-            {{end}}  
             {{end}}
         </div>
         {{end}}
-    </main>
+        {{end}}
+    </section>
+</main>
 </body>
 </html>
