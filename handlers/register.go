@@ -5,6 +5,7 @@ import (
 	"forum/templates"
 	"html/template"
 	"net/http"
+	"strings"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -17,76 +18,74 @@ type RegisterRequest struct {
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
-		// Рендерим HTML-форму для регистрации
+		// Рендеринг формы
 		tmpl, err := template.ParseFS(templates.Files, "register.html")
 		if err != nil {
 			ErrorHandler(w, "Template loading error", http.StatusInternalServerError)
 			return
 		}
-		data := struct {
-			Check string
-		}{
-			Check: checker,
-		}
+		data := struct{ Check string }{Check: checker}
 		if checker != "" {
 			checker = ""
 		}
-		err = tmpl.Execute(w, data)
-		if err != nil {
-			ErrorHandler(w, "Error rendering template", http.StatusInternalServerError)
-			return
-		}
+		tmpl.Execute(w, data)
 		return
 	}
 
 	if r.Method == http.MethodPost {
-		// Обрабатываем данные из формы
 		req := RegisterRequest{
-			Email:    r.FormValue("email"),
-			Username: r.FormValue("username"),
+			Email:    strings.ToLower(strings.TrimSpace(r.FormValue("email"))),
+			Username: strings.TrimSpace(r.FormValue("username")),
 			Password: r.FormValue("password"),
 		}
-
-		// Проверка, существует ли уже email
-		emailExists, err := database.CheckEmailExists(req.Email)
-		if err != nil {
-			checker = "Email verification error"
+		// Валидация полей
+		if err := validateCredentials(req); err != nil {
+			checker = err.Error()
 			http.Redirect(w, r, "/register", http.StatusSeeOther)
 			return
 		}
-		if emailExists {
+
+		// Проверка уникальности email и username
+		if exists, err := database.CheckEmailExists(req.Email); err != nil || exists {
 			checker = "Email is already in use"
 			http.Redirect(w, r, "/register", http.StatusSeeOther)
 			return
 		}
 
-		// Хэшируем пароль
-		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
-		if err != nil {
-			ErrorHandler(w, "H loading error", http.StatusInternalServerError)
+		if exists, err := database.CheckUsernameExists(req.Username); err != nil || exists {
+			checker = "The username is already taken"
+			http.Redirect(w, r, "/register", http.StatusSeeOther)
 			return
 		}
 
-		// Вставка данных в базу
+		// Хэширование пароля
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+		if err != nil {
+			ErrorHandler(w, "Password hashing error", http.StatusInternalServerError)
+			return
+		}
+
+		// Сохранение в БД
 		db, err := database.InitDB()
 		if err != nil {
-			ErrorHandler(w, "Database connection error", http.StatusInternalServerError)
+			ErrorHandler(w, "Error connecting to the database", http.StatusInternalServerError)
 			return
 		}
 		defer db.Close()
 
-		_, err = db.Exec(
-			"INSERT INTO users (email, username, password,role) VALUES (?, ?, ?, 'user')",
+		if _, err = db.Exec(
+			"INSERT INTO users (email, username, password, role) VALUES (?, ?, ?, 'user')",
 			req.Email, req.Username, hashedPassword,
-		)
-		if err != nil {
-			ErrorHandler(w, "Error when creating a user", http.StatusInternalServerError)
+		); err != nil {
+			ErrorHandler(w, "User creation error", http.StatusInternalServerError)
 			return
 		}
 
-		// Перенаправляем на страницу логина после успешной регистрации
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
-	ErrorHandler(w, "The method is not supported", http.StatusInternalServerError)
+
+	ErrorHandler(w, "The method is not supported", http.StatusMethodNotAllowed)
 }
+
+// Валидация входных данных

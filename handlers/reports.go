@@ -36,7 +36,6 @@ func ReportsHandler(w http.ResponseWriter, r *http.Request) {
 	db, err := database.InitDB()
 	if err != nil {
 		http.Error(w, "Database connection error", http.StatusInternalServerError)
-		log.Println("Ошибка подключения к БД:", err)
 		return
 	}
 	defer db.Close()
@@ -121,7 +120,6 @@ func ReportsHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := template.ParseFS(templates.Files, "reports.html")
 	if err != nil {
 		http.Error(w, "Template parsing error", http.StatusInternalServerError)
-		log.Println("Ошибка загрузки шаблона:", err)
 		return
 	}
 	data := map[string]interface{}{
@@ -131,6 +129,5 @@ func ReportsHandler(w http.ResponseWriter, r *http.Request) {
 	err = tmpl.Execute(w, data)
 	if err != nil {
 		http.Error(w, "Template rendering error", http.StatusInternalServerError)
-		log.Println("Ошибка рендеринга:", err)
 	}
 }

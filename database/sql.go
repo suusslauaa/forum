@@ -149,7 +149,6 @@ func createTables(db *sql.DB) error {
 
 // CheckEmailExists проверяет, существует ли email в базе
 func CheckEmailExists(email string) (bool, error) {
-	// Убедитесь, что соединение с базой данных открыто
 	db, err := InitDB()
 	if err != nil {
 		return false, err
@@ -157,12 +156,7 @@ func CheckEmailExists(email string) (bool, error) {
 	defer db.Close()
 
 	var count int
-	err = db.QueryRow("SELECT COUNT(*) FROM users WHERE email = ?", email).Scan(&count)
-	if err != nil {
-		return false, err
-	}
-
-	// Если count > 0, то email уже существует
-
-	return count > 0, nil
+	// Используем LOWER() в SQL запросе
+	err = db.QueryRow("SELECT COUNT(*) FROM users WHERE LOWER(email) = LOWER(?)", email).Scan(&count)
+	return count > 0, err
 }
