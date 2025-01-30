@@ -107,7 +107,7 @@ func NotificationsHandler(w http.ResponseWriter, r *http.Request) {
 	data := map[string]interface{}{
 		"Activities": activities,
 		"Username":   username,
-		"Moders":     Moders,
+		"Moder":      Moders,
 		"Admin":      admin,
 	}
 

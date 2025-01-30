@@ -110,7 +110,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		"Username":   username,
 		"Posts":      posts,
 		"Categories": categories,
-		"Moders":     Moders,
+		"Moder":      Moders,
 		"Admin":      admin,
 	}
 

@@ -63,15 +63,11 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		data := map[string]interface{}{
-			"Username": username,
-			"Moders":   Moders,
-			"UserId":   loggedInUserID,
-			"Admin":    admin,
-			"Category": categories,
-			"Check":    checker,
-		}
-		if checker != "" {
-			checker = ""
+			"Username":   username,
+			"Moder":      Moders,
+			"UserID":     loggedInUserID,
+			"Admin":      admin,
+			"Categories": categories,
 		}
 
 		err = tmpl.Execute(w, data)

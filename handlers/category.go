@@ -114,10 +114,10 @@ func CategoryHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := map[string]interface{}{
-		"Username": username,
-		"Moders":   Moders,
-		"Admin":    admin,
-		"Category": categories,
+		"Username":   username,
+		"Moder":      Moders,
+		"Admin":      admin,
+		"Categories": categories,
 	}
 
 	// Отправляем данные в шаблон

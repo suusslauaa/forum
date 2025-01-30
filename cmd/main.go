@@ -13,7 +13,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var limiter = rate.NewLimiter(1, 5)
+var limiter = rate.NewLimiter(1, 15)
 
 func main() {
 	// Открытие подключения к базе данных

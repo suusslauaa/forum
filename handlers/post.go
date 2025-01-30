@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"database/sql"
+	"fmt"
 	"forum/database"
 	"forum/templates"
 	"html/template"
@@ -48,8 +49,10 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 	if role == "admin" {
 		admin = true
 	}
+	fmt.Println(role, Moders)
 	// Получаем ID поста из параметров URL
 	postIDStr := r.URL.Query().Get("id")
+
 	if postIDStr == "" {
 		ErrorHandler(w, "Post ID is required", http.StatusBadRequest)
 		return
@@ -108,8 +111,9 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 		"Post":          post,
 		"Comments":      comments,
 		"SessionUserID": UserID,
-		"Moders":        Moders,
+		"Moder":         Moders,
 		"Admin":         admin,
+		"UserRole":      role,
 	}
 
 	err = tmpl.Execute(w, data)

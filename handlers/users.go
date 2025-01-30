@@ -97,9 +97,15 @@ func UserListHandler(w http.ResponseWriter, r *http.Request) {
 		ErrorHandler(w, "Template parsing error", http.StatusInternalServerError)
 		return
 	}
-
+	Moders := true
+	admin := true
+	data := map[string]interface{}{
+		"Users": users,
+		"Moder": Moders,
+		"Admin": admin,
+	}
 	// Отправляем данные в шаблон
-	err = tmpl.Execute(w, users)
+	err = tmpl.Execute(w, data)
 	if err != nil {
 		ErrorHandler(w, "Template rendering error", http.StatusInternalServerError)
 	}

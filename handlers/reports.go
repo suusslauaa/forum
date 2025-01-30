@@ -118,8 +118,12 @@ func ReportsHandler(w http.ResponseWriter, r *http.Request) {
 		ErrorHandler(w, "Template parsing error", http.StatusInternalServerError)
 		return
 	}
+	Moders := true
+	admin := true
 	data := map[string]interface{}{
-		"Reports": reports,
+		"Moder":    Moders,
+		"Admin":    admin,
+		"UserRole": role,
 	}
 	// Отправляем данные в шаблон
 	err = tmpl.Execute(w, data)

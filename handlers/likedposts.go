@@ -68,7 +68,7 @@ func LikePostHandler(w http.ResponseWriter, r *http.Request) {
 		"ID":       UserID,
 		"Username": username,
 		"Posts":    posts,
-		"Moders":   Moders,
+		"Moder":    Moders,
 		"Admin":    admin,
 	}
 	// Рендерим шаблон
