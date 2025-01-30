@@ -56,7 +56,7 @@ func GetUserActivity(w http.ResponseWriter, r *http.Request) {
 	}
 	rows, err := db.Query(query, userID)
 	if err != nil {
-		http.Error(w, "Database query failed", http.StatusInternalServerError)
+		ErrorHandler(w, "Database query failed", http.StatusInternalServerError)
 		return
 	}
 	Moders := false
@@ -83,8 +83,7 @@ func GetUserActivity(w http.ResponseWriter, r *http.Request) {
 
 	tmpl, err := template.ParseFS(templates.Files, "activity_page.html")
 	if err != nil {
-		log.Println("Error loading template:", err)
-		http.Error(w, "Failed to load template", http.StatusInternalServerError)
+		ErrorHandler(w, "Failed to load template", http.StatusInternalServerError)
 		return
 	}
 
@@ -98,7 +97,7 @@ func GetUserActivity(w http.ResponseWriter, r *http.Request) {
 
 	err = tmpl.Execute(w, data)
 	if err != nil {
-		http.Error(w, "Failed to render template", http.StatusInternalServerError)
+		ErrorHandler(w, "Failed to render template", http.StatusInternalServerError)
 		return
 	}
 }

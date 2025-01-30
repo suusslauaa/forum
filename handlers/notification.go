@@ -80,7 +80,7 @@ func NotificationsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	rows, err := db.Query(query, userID)
 	if err != nil {
-		http.Error(w, "Database query failed", http.StatusInternalServerError)
+		ErrorHandler(w, "Database query failed", http.StatusInternalServerError)
 		return
 	}
 	defer rows.Close()
@@ -99,7 +99,7 @@ func NotificationsHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := template.ParseFiles("templates/notifications.html")
 	if err != nil {
 		log.Println("Error loading template:", err)
-		http.Error(w, "Failed to load template", http.StatusInternalServerError)
+		ErrorHandler(w, "Failed to load template", http.StatusInternalServerError)
 		return
 	}
 
@@ -113,7 +113,7 @@ func NotificationsHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = tmpl.Execute(w, data)
 	if err != nil {
-		http.Error(w, "Failed to render template", http.StatusInternalServerError)
+		ErrorHandler(w, "Failed to render template", http.StatusInternalServerError)
 		return
 	}
 }
@@ -172,7 +172,7 @@ func ReadNotificationsHandler(w http.ResponseWriter, r *http.Request) {
 
 	rows, err := db.Query(query, userID)
 	if err != nil {
-		http.Error(w, "Database query failed", http.StatusInternalServerError)
+		ErrorHandler(w, "Database query failed", http.StatusInternalServerError)
 		return
 	}
 	defer rows.Close()
@@ -191,7 +191,7 @@ func ReadNotificationsHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := template.ParseFS(templates.Files, "readnotifications.html")
 	if err != nil {
 		log.Println("Error loading template:", err)
-		http.Error(w, "Failed to load template", http.StatusInternalServerError)
+		ErrorHandler(w, "Failed to load template", http.StatusInternalServerError)
 		return
 	}
 
@@ -203,7 +203,7 @@ func ReadNotificationsHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = tmpl.Execute(w, data)
 	if err != nil {
-		http.Error(w, "Failed to render template", http.StatusInternalServerError)
+		ErrorHandler(w, "Failed to render template", http.StatusInternalServerError)
 		return
 	}
 }

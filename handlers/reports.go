@@ -5,7 +5,6 @@ import (
 	"forum/database" // Импортируй правильный путь к database
 	"forum/templates"
 	"html/template"
-	"log"
 	"net/http"
 	"strconv"
 )
@@ -35,7 +34,7 @@ func ReportsHandler(w http.ResponseWriter, r *http.Request) {
 	// Подключаемся к базе данных
 	db, err := database.InitDB()
 	if err != nil {
-		http.Error(w, "Database connection error", http.StatusInternalServerError)
+		ErrorHandler(w, "Database connection error", http.StatusInternalServerError)
 		return
 	}
 	defer db.Close()
@@ -43,7 +42,7 @@ func ReportsHandler(w http.ResponseWriter, r *http.Request) {
 	// Проверяем роль пользователя (только admin может видеть страницу)
 	role, err := GetUserRole(db, UserID)
 	if err != nil {
-		http.Error(w, "Error fetching user role", http.StatusInternalServerError)
+		ErrorHandler(w, "Error fetching user role", http.StatusInternalServerError)
 		return
 	}
 	if role != "admin" {
@@ -61,7 +60,6 @@ func ReportsHandler(w http.ResponseWriter, r *http.Request) {
 	`)
 	if err != nil {
 		http.Error(w, "Database query error", http.StatusInternalServerError)
-		log.Println("Ошибка запроса к БД:", err)
 		return
 	}
 	defer rows.Close()
@@ -74,8 +72,7 @@ func ReportsHandler(w http.ResponseWriter, r *http.Request) {
 
 		// Сканируем данные, но обрабатываем NULL для названия поста
 		if err := rows.Scan(&report.ID, &report.PostID, &postTitle, &report.Reporter); err != nil {
-			http.Error(w, "Error scanning reports", http.StatusInternalServerError)
-			log.Println("Ошибка при сканировании:", err)
+			ErrorHandler(w, "Error scanning reports", http.StatusInternalServerError)
 			return
 		}
 
@@ -91,8 +88,7 @@ func ReportsHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Проверяем ошибки после `rows.Next()`
 	if err = rows.Err(); err != nil {
-		http.Error(w, "Database iteration error", http.StatusInternalServerError)
-		log.Println("Ошибка обработки строк:", err)
+		ErrorHandler(w, "Database iteration error", http.StatusInternalServerError)
 		return
 	}
 
@@ -119,7 +115,7 @@ func ReportsHandler(w http.ResponseWriter, r *http.Request) {
 	// Загружаем HTML-шаблон
 	tmpl, err := template.ParseFS(templates.Files, "reports.html")
 	if err != nil {
-		http.Error(w, "Template parsing error", http.StatusInternalServerError)
+		ErrorHandler(w, "Template parsing error", http.StatusInternalServerError)
 		return
 	}
 	data := map[string]interface{}{
@@ -128,6 +124,6 @@ func ReportsHandler(w http.ResponseWriter, r *http.Request) {
 	// Отправляем данные в шаблон
 	err = tmpl.Execute(w, data)
 	if err != nil {
-		http.Error(w, "Template rendering error", http.StatusInternalServerError)
+		ErrorHandler(w, "Template rendering error", http.StatusInternalServerError)
 	}
 }
