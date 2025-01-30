@@ -1,76 +1,74 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
+/* Общие стили */
 body {
     font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+    line-height: 1.6;
     display: flex;
     flex-direction: column;
-    height: 100vh;
-    background-color: #f9f9f9;
+    min-height: 100vh;
 }
 
 header {
-    position: fixed;
-    top: 0;
-    left: 0;
     width: 100%;
-    height: 70px;
+    background-color: #007bff;
+    color: white;
+    padding: 15px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: white;
-    z-index: 1000;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+.forum {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+}
 
-header .nav a {
+.forum a {
     color: white;
     text-decoration: none;
-    margin-right: 15px;
+    font-size: 28px;
+    font-weight: bold;
+    transition: opacity 0.3s;
 }
 
-header .create-post {
+.forum a:hover {
+    opacity: 0.8;
+}
+
+.heddy {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 10px;
-}
-
-main {
-    display: flex;
-    flex-direction: column;
-    justify-content: center; /* Вертикальное центрирование */
-    align-items: center;     /* Горизонтальное центрирование */
-    flex: 1;
-    margin-top: 70px; /* Высота header */
-    padding: 20px;
-    width: 100%;
+    width: 90%;
     max-width: 1200px;
-    box-sizing: border-box;
     margin: 0 auto;
 }
 
-.sidebar {
-    width: 25%;
-    background-color: #e9ecef;
-    padding: 15px;
-    border-radius: 10px;
-    margin-right: 20px;
+.left, .right {
+    display: flex;
+    gap: 20px;
+    align-items: center;
 }
 
-.content {
-    width: 100%;
-    max-width: 600px;       /* Ограничение ширины контента */
-    padding: 20px;
-    background: #ffffff;    /* Фон для контента */
-    border-radius: 10px;    /* Округление краев */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Легкая тень */
-    text-align: left;       /* Выравнивание текста по левому краю */
+.left a, .right a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    transition: opacity 0.3s;
+}
+
+.left a:hover, .right a:hover {
+    opacity: 0.8;
+}
+
+.user-menu {
+    position: relative;
+    display: inline-block;
 }
 
 .circle {
@@ -83,155 +81,20 @@ main {
     justify-content: center;
     align-items: center;
     font-weight: bold;
-    margin-left: 10px;
     cursor: pointer;
     position: relative;
 }
 
 .circle:hover .dropdown {
-    display: flex;
-}
-
-.dropdown {
-    display: none;
-    flex-direction: column;
-    gap: 5px;
-    position: absolute;
-    top: 40px;
-    right: 0;
-    background-color: #fff;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    padding: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    z-index: 10;
-}
-
-.circle::after {
-    content: '';
-    position: absolute;
-    top: 30px; /* Соединяем круг с меню */
-    right: 0;
-    width: 100%;
-    height: 10px; /* Высота, чтобы перекрыть зазор */
-    background: transparent; /* Делаем её невидимой */
-    z-index: 5;
-}
-
-.dropdown button {
-    background: none;
-    border: none;
-    padding: 5px 10px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: bold;
-    color: #333;
-    text-align: left;
-}
-
-.dropdown button:hover {
-    background-color: #f4f4f4;
-}
-
-.post {
-    background-color: white;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    padding: 15px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.post:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
-}
-
-.post-title {
-    font-size: 1.5em;
-    margin-bottom: 10px;
-    color: #007bff;
-}
-
-.post-content {
-    font-size: 1em;
-    line-height: 1.6;
-    color: #333;
-}
-.post-category {
-    font-size: 0.9em;
-    color: #6c757d;
-    font-style: italic;
-    margin-top: 10px;
-}
-
-.create-post-button {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    padding: 10px 20px;
-    font-size: 1em;
-    font-weight: bold;
-    cursor: pointer;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
-}
-
-.create-post-button:hover {
-    background-color: #0056b3;
-    transform: translateY(-3px);
-    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
-}
-
-.create-post-button:active {
-    transform: translateY(1px);
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
-}
-
-.category-list {
-    list-style: none;
-    padding: 0;
-}
-
-.category-list li {
-    margin: 10px 0;
-}
-
-.category-item {
     display: block;
-    padding: 10px;
-    font-size: 16px;
-    color: #555;
-    text-decoration: none;
-    border-radius: 4px;
-    transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.category-item:hover {
-    background-color: #007bff;
-    color: white;
-}
-
-.sidebar-title {
-    font-size: 18px;
-    font-weight: bold;
-    margin-bottom: 15px;
-    color: #333;
-}
-
-.circle:hover .dropdown {
-    display: flex;
 }
 
 .dropdown {
     display: none;
-    flex-direction: column;
     position: absolute;
     top: 50px;
     right: 0;
-    background-color: #fff;
+    background-color: white;
     border: 1px solid #ccc;
     border-radius: 5px;
     padding: 10px;
@@ -239,75 +102,36 @@ main {
     z-index: 10;
 }
 
-.dropdown-link {
+.dropdown a {
+    color: black;
+    text-decoration: none;
     display: block;
-    padding: 10px 15px;
-    font-size: 14px;
-    color: #007bff;
-    text-decoration: none;
-    border-radius: 5px;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    padding: 8px;
+    transition: background-color 0.3s;
 }
 
-.dropdown-link:hover {
-    background-color: #007bff;
-    color: white;
+.dropdown a:hover {
+    background-color: #f1f1f1;
 }
 
-.circle::after {
-    content: '';
-    position: absolute;
-    top: 40px; /* Расстояние до меню */
-    right: -5px; /* Небольшой запас по горизонтали */
-    left: -5px; /* Небольшой запас по горизонтали */
-    height: 10px; /* Высота невидимой области */
-    background: transparent; /* Прозрачный фон */
-    z-index: 1; /* Чтобы область находилась над другими элементами */
-}
-
-.dropdown {
-    display: none;
-    flex-direction: column;
-    gap: 5px;
-    position: absolute;
-    top: 50px; /* Смещение ниже круга */
-    right: 0;
-    background-color: #fff;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    padding: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    z-index: 10;
-}
-
-.circle:hover .dropdown,
-.dropdown:hover {
+/* Основной контент */
+main {
+    flex-grow: 1;
     display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
 }
 
-.auth-link {
-    display: inline-block;
-    padding: 10px 20px;
-    font-size: 1em;
-    font-weight: bold;
-    color: white;
-    text-decoration: none;
-    background-color: #007bff;
-    border-radius: 5px;
-    transition: background-color 0.3s ease, transform 0.2s, box-shadow 0.2s;
+.content {
+    width: 100%;
+    max-width: 600px;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    margin-right: 10px; /* Расстояние между кнопками */
-}
-
-.auth-link:hover {
-    background-color: #0056b3;
-    transform: translateY(-3px);
-    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
-}
-
-.auth-link:active {
-    transform: translateY(1px);
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    text-align: left;
+    box-sizing: border-box; /* Добавлено для корректного расчета ширины */
 }
 
 .page-title {
@@ -319,12 +143,6 @@ main {
 }
 
 .create-post-form {
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    max-width: 600px;
-    margin: 0 auto;
     display: flex;
     flex-direction: column;
     gap: 15px;
@@ -336,20 +154,17 @@ main {
     color: #333;
 }
 
-.form-input, 
-.form-textarea, 
-.form-select {
-    width: 100%;
+.form-input, .form-textarea, .form-select {
+    width: calc(100% - 22px); /* Учитываем padding и border */
     padding: 10px;
     font-size: 1rem;
     border: 1px solid #ccc;
     border-radius: 5px;
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box; /* Добавлено для корректного расчета ширины */
 }
 
-.form-input:focus, 
-.form-textarea:focus, 
-.form-select:focus {
+.form-input:focus, .form-textarea:focus, .form-select:focus {
     border-color: #007bff;
     outline: none;
     box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
@@ -370,6 +185,8 @@ main {
     font-weight: bold;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.2s ease;
+    width: 100%; /* Кнопка занимает всю ширину */
+    box-sizing: border-box; /* Добавлено для корректного расчета ширины */
 }
 
 .create-post-button:hover {
@@ -381,4 +198,23 @@ main {
     transform: translateY(1px);
 }
 
+/* Адаптивность */
+@media (max-width: 768px) {
+    .heddy {
+        flex-direction: column;
+        gap: 10px;
+    }
 
+    .left, .right {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .content {
+        padding: 15px;
+    }
+
+    .page-title {
+        font-size: 1.5rem;
+    }
+}

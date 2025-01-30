@@ -7,8 +7,8 @@ import (
 )
 
 type Errors struct {
-	Message string `json:"message"`
-	Code    int    `json:"code"`
+	Message string
+	Code    int
 }
 
 func ErrorHandler(w http.ResponseWriter, message string, code int) {

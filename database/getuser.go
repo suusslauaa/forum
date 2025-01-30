@@ -33,3 +33,15 @@ func GetUserByEmail(db *sql.DB, email string) (*User, error) {
 func ComparePassword(hashedPassword string, password string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }
+
+func CheckUsernameExists(username string) (bool, error) {
+	db, err := InitDB()
+	if err != nil {
+		return false, err
+	}
+	defer db.Close()
+
+	var count int
+	err = db.QueryRow("SELECT COUNT(*) FROM users WHERE username = ?", username).Scan(&count)
+	return count > 0, err
+}

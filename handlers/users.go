@@ -4,7 +4,6 @@ import (
 	"forum/database"
 	"forum/templates"
 	"html/template"
-	"log"
 	"net/http"
 )
 
@@ -32,7 +31,6 @@ func UserListHandler(w http.ResponseWriter, r *http.Request) {
 	db, err := database.InitDB()
 	if err != nil {
 		http.Error(w, "Database connection error", http.StatusInternalServerError)
-		log.Println("Ошибка подключения к БД:", err)
 		return
 	}
 	defer db.Close()
@@ -97,7 +95,6 @@ func UserListHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := template.ParseFS(templates.Files, "users.html")
 	if err != nil {
 		http.Error(w, "Template parsing error", http.StatusInternalServerError)
-		log.Println("Ошибка загрузки шаблона:", err)
 		return
 	}
 
@@ -105,6 +102,5 @@ func UserListHandler(w http.ResponseWriter, r *http.Request) {
 	err = tmpl.Execute(w, users)
 	if err != nil {
 		http.Error(w, "Template rendering error", http.StatusInternalServerError)
-		log.Println("Ошибка рендеринга:", err)
 	}
 }
