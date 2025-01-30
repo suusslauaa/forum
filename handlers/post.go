@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"forum/database"
 	"html/template"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -443,16 +444,91 @@ func CommentHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer db.Close()
-
+	postID, _ := database.GetPostIDByCommentID(db, commentID)
 	if r.Method == http.MethodPost && loggedIn {
 
 		if err := handleCommentActions(w, r, db, commentID, UserID); err != nil {
 			ErrorHandler(w, "Error handling post action", http.StatusInternalServerError)
 			return
 		}
-		postID, _ := database.GetPostIDByCommentID(db, commentID)
+
 		// Перенаправляем на страницу поста с добавленным комментарием
 		http.Redirect(w, r, "/post?id="+strconv.Itoa(postID), http.StatusSeeOther)
 		return
 	}
+}
+
+func GetUserActivity(w http.ResponseWriter, r *http.Request) {
+	// Проверка сессии
+	sessionID, err := getSessionID(w, r)
+	if err != nil {
+		ErrorHandler(w, "Session error", http.StatusInternalServerError)
+		return
+	}
+
+	// _, loggedIn := store[sessionID.Value]
+
+	// Получаем ID пользователя по имени
+	userID, _ := id[sessionID.Value]
+
+	query := `
+	SELECT a.activity_type, a.created_at, p.id AS post_id, c.id AS comment_id
+	FROM activities a
+	LEFT JOIN posts p ON a.post_id = p.id
+	LEFT JOIN comments c ON a.comment_id = c.id
+	WHERE a.user_id = $1
+	ORDER BY a.created_at DESC;
+	`
+	// Открываем соединение с базой данных
+	db, err := database.InitDB()
+	if err != nil {
+		ErrorHandler(w, "Database connection error", http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+
+	rows, err := db.Query(query, userID)
+	if err != nil {
+		http.Error(w, "Database query failed", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var activities []Activity
+	for rows.Next() {
+		var activity Activity
+		// Сканируем в указатели для корректной работы с NULL
+		if err := rows.Scan(&activity.Type, &activity.CreatedAt, &activity.PostID, &activity.CommentID); err != nil {
+			log.Println(err)
+			continue
+		}
+		activities = append(activities, activity)
+	}
+
+	tmpl, err := template.ParseFiles("templates/activity_page.html")
+	if err != nil {
+		log.Println("Error loading template:", err)
+		http.Error(w, "Failed to load template", http.StatusInternalServerError)
+		return
+	}
+
+	// Передаем данные в шаблон
+	data := map[string]interface{}{
+		"Activities": activities,
+	}
+
+	err = tmpl.Execute(w, data)
+	if err != nil {
+		http.Error(w, "Failed to render template", http.StatusInternalServerError)
+		return
+	}
+}
+
+type Activity struct {
+	ID        int
+	AuthorID  int
+	Type      string
+	PostID    *int
+	CommentID *int
+	CreatedAt string
 }

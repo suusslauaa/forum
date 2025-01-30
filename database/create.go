@@ -62,7 +62,7 @@ func DeleteCategory(db *sql.DB, id int) error {
 // CreatePost создает новый пост, привязанный к категории
 func CreatePost(db *sql.DB, title, content string, authorID, categoryID int, createdAt, imagePath string) error {
 	query := `INSERT INTO posts (title, content, author_id, category_id, created_at, image_path) 
-			  VALUES (?, ?, ?, ?, ?, ?);`
+				VALUES ($1, $2, $3, $4, $5, $6) RETURNING id;`
 
 	// Используем подготовленный запрос для безопасности
 	stmt, err := db.Prepare(query)
@@ -70,10 +70,8 @@ func CreatePost(db *sql.DB, title, content string, authorID, categoryID int, cre
 		return err
 	}
 	defer stmt.Close()
-	// Выполняем запрос
-	log.Println("Executing query:", query)
-	log.Println("Params:", title, content, authorID, categoryID, createdAt, imagePath)
 
+	var postID int
 	var imgPath interface{}
 	if imagePath == "" {
 		imgPath = nil
@@ -81,8 +79,15 @@ func CreatePost(db *sql.DB, title, content string, authorID, categoryID int, cre
 		imgPath = imagePath
 	}
 
-	_, err = stmt.Exec(title, content, authorID, categoryID, createdAt, imgPath)
-	return err
+	// Выполняем запрос и получаем ID вставленного поста
+	err = db.QueryRow(query, title, content, authorID, categoryID, createdAt, imgPath).Scan(&postID)
+	if err != nil {
+		return err
+	}
+	query = `INSERT INTO activities (user_id, activity_type, post_id, created_at) 
+	           VALUES ($1, 'create_post', $2, CURRENT_TIMESTAMP)`
+	_, err = db.Exec(query, authorID, postID)
+	return nil
 }
 
 func CreateUser(db *sql.DB, email, username, password, role string) error {
@@ -135,6 +140,9 @@ func ToggleLike(db *sql.DB, postID, userID int) error {
 		}
 		// Увеличиваем счетчик лайков
 		_, err = db.Exec("UPDATE posts SET liked = liked + 1 WHERE id = ?", postID)
+		query := `INSERT INTO activities (user_id, activity_type, post_id, created_at) 
+		VALUES ($1, 'like_post', $2, CURRENT_TIMESTAMP)`
+		_, err = db.Exec(query, userID, postID)
 		return err
 	} else if err != nil {
 		return err
@@ -157,6 +165,9 @@ func ToggleLike(db *sql.DB, postID, userID int) error {
 		}
 		// Обновляем счетчики
 		_, err = db.Exec("UPDATE posts SET liked = liked + 1, disliked = disliked - 1 WHERE id = ?", postID)
+		query := `INSERT INTO activities (user_id, activity_type, post_id, created_at) 
+		VALUES ($1, 'like_post', $2, CURRENT_TIMESTAMP)`
+		_, err = db.Exec(query, userID, postID)
 		return err
 	}
 }
@@ -174,6 +185,9 @@ func ToggleDislike(db *sql.DB, postID, userID int) error {
 		}
 		// Увеличиваем счетчик лайков
 		_, err = db.Exec("UPDATE posts SET disliked = disliked + 1 WHERE id = ?", postID)
+		query := `INSERT INTO activities (user_id, activity_type, post_id, created_at) 
+		VALUES ($1, 'dislike_post', $2, CURRENT_TIMESTAMP)`
+		_, err = db.Exec(query, userID, postID)
 		return err
 	} else if err != nil {
 		return err
@@ -196,6 +210,9 @@ func ToggleDislike(db *sql.DB, postID, userID int) error {
 		}
 		// Обновляем счетчики
 		_, err = db.Exec("UPDATE posts SET disliked = disliked + 1, liked = liked - 1 WHERE id = ?", postID)
+		query := `INSERT INTO activities (user_id, activity_type, post_id, created_at) 
+		VALUES ($1, 'dislike_post', $2, CURRENT_TIMESTAMP)`
+		_, err = db.Exec(query, userID, postID)
 		return err
 	}
 }
@@ -208,11 +225,27 @@ func DeletePost(db *sql.DB, postID int) error {
 
 func AddComment(db *sql.DB, postID, userID int, content string) error {
 	// Вставляем новый комментарий в таблицу
-	_, err := db.Exec(`
-		INSERT INTO comments (post_id, user_id, content)
-		VALUES (?, ?, ?)`,
-		postID, userID, content,
-	)
+	query := `INSERT INTO comments (post_id, user_id, content)
+			VALUES (?, ?, ?) RETURNING id`
+
+	// Используем подготовленный запрос для безопасности
+	stmt, err := db.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	var commentID string
+
+	// Выполняем запрос и получаем ID вставленного поста
+	err = db.QueryRow(query, postID, userID, content).Scan(&commentID)
+	if err != nil {
+		return err
+	}
+	query = `INSERT INTO activities (user_id, activity_type, comment_id, post_id, created_at) 
+	           VALUES ($1, 'create_comment', $2, $3, CURRENT_TIMESTAMP)`
+	_, err = db.Exec(query, userID, commentID, postID)
 	return err
 }
 

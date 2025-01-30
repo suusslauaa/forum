@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"forum/database"
 	"html/template"
 	"net/http"
@@ -23,7 +24,7 @@ func ShowPromotionFormHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Загружаем шаблон для формы подачи заявки
-	tmpl, err := template.ParseFiles("./templates/formoder.html")
+	tmpl, err := template.ParseFiles("templates/formoder.html")
 	if err != nil {
 		ErrorHandler(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -37,7 +38,10 @@ func ShowPromotionFormHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Отображаем шаблон
-	tmpl.Execute(w, data)
+	err = tmpl.Execute(w, data)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 func SubmitPromotionRequestHandler(w http.ResponseWriter, r *http.Request) {

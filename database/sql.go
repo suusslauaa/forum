@@ -38,7 +38,7 @@ func createTables(db *sql.DB) error {
 			username TEXT UNIQUE NOT NULL,
 			password TEXT NOT NULL,
 			role TEXT NOT NULL CHECK(role IN ('guest', 'user', 'moderator', 'admin')),
-										 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 		);`,
 		`CREATE TABLE IF NOT EXISTS categories (
 			id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
@@ -51,6 +51,7 @@ func createTables(db *sql.DB) error {
 			category_id INTEGER,
 			author_id INTEGER NOT NULL,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			updated_at TIMESTAMP,
 			liked INTEGER DEFAULT 0, -- Начальное значение лайков 0
 			disliked INTEGER DEFAULT 0, -- Начальное значение лайков 0
 			image_path TEXT, -- Добавляем поле для хранения пути к изображению
@@ -90,27 +91,39 @@ func createTables(db *sql.DB) error {
 			FOREIGN KEY (user_id) REFERENCES users(id)
 		);`,
 		`CREATE TABLE IF NOT EXISTS comments (
-    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    post_id INTEGER NOT NULL,            -- Ссылка на пост
-    user_id INTEGER NOT NULL,            -- Ссылка на пользователя (автора комментария)
-    content TEXT NOT NULL,               -- Содержание комментария
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- Время создания комментария
-	liked INTEGER DEFAULT 0, -- Начальное значение лайков 0
-	disliked INTEGER DEFAULT 0, -- Начальное значение лайков 0
-    FOREIGN KEY (post_id) REFERENCES posts(id),      -- Внешний ключ на таблицу постов
-    FOREIGN KEY (user_id) REFERENCES users(id)       -- Внешний ключ на таблицу пользователей
-);`,
-	`CREATE TABLE IF NOT EXISTS reports (
-		id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-		post_id INTEGER,
-		comment_id INTEGER,
-		reported_by INTEGER NOT NULL,
-		reason TEXT NOT NULL,
-		status TEXT DEFAULT 'open' CHECK(status IN ('open', 'resolved')),
-		FOREIGN KEY (post_id) REFERENCES posts(id),
-		FOREIGN KEY (comment_id) REFERENCES comments(id),
-		FOREIGN KEY (reported_by) REFERENCES users(id)
-	);`,
+			id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+			post_id INTEGER NOT NULL,            -- Ссылка на пост
+			user_id INTEGER NOT NULL,            -- Ссылка на пользователя (автора комментария)
+			content TEXT NOT NULL,               -- Содержание комментария
+			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- Время создания комментария
+			updated_at TIMESTAMP,
+			liked INTEGER DEFAULT 0, -- Начальное значение лайков 0
+			disliked INTEGER DEFAULT 0, -- Начальное значение лайков 0
+			FOREIGN KEY (post_id) REFERENCES posts(id),      -- Внешний ключ на таблицу постов
+			FOREIGN KEY (user_id) REFERENCES users(id)       -- Внешний ключ на таблицу пользователей
+		);`,
+		`CREATE TABLE IF NOT EXISTS reports (
+			id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+			post_id INTEGER,
+			comment_id INTEGER,
+			reported_by INTEGER NOT NULL,
+			reason TEXT NOT NULL,
+			status TEXT DEFAULT 'open' CHECK(status IN ('open', 'resolved')),
+			FOREIGN KEY (post_id) REFERENCES posts(id),
+			FOREIGN KEY (comment_id) REFERENCES comments(id),
+			FOREIGN KEY (reported_by) REFERENCES users(id)
+		);`,
+		`CREATE TABLE IF NOT EXISTS activities (
+			id INTEGER PRIMARY KEY,
+			user_id INTEGER,
+			activity_type VARCHAR(20) NOT NULL, -- Тип активности ('post', 'like', 'dislike', 'comment')
+			post_id INTEGER,                        -- ID поста, если применимо
+			comment_id INTEGER,                     -- ID комментария, если применимо
+			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+			FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE SET NULL,
+			FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE SET NULL
+		);`,
 	}
 
 	// Выполнение всех запросов на создание таблиц

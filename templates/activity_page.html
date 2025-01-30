@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Activity</title>
+    <style>
+        .activity {
+            border: 1px solid #ccc;
+            margin: 10px 0;
+            padding: 10px;
+        }
+        .type, .timestamp {
+            font-weight: bold;
+        }
+        .type {
+            color: #007BFF;
+        }
+    </style>
+</head>
+<body>
+    <h1>User Activity</h1>
+
+    {{range .Activities}}
+    <div class="activity">
+        <div class="type">Type: {{.Type}}</div>
+        <div class="timestamp">Created At: {{.CreatedAt}}</div>
+        {{if .PostID}}
+        <a href="/posts?id={{.PostID}}">View Post</a>
+        {{end}}
+    </div>
+    {{end}}
+</body>
+</html>

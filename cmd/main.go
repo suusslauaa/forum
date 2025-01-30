@@ -38,7 +38,6 @@ func main() {
 	http.HandleFunc("/logout", handlers.LogoutHandler)
 	http.HandleFunc("/create-post", handlers.CreatePostHandler)
 	http.HandleFunc("/notifications", handlers.NotificationsHandler)
-	http.HandleFunc("/activity-page", handlers.ActivityPageHandler)
 	http.HandleFunc("/edit-post", handlers.EditPostHandler)
 	http.HandleFunc("/post", handlers.PostHandler)
 	http.HandleFunc("/my-posts", handlers.UserPostHandler)
@@ -53,7 +52,7 @@ func main() {
 	http.HandleFunc("/callback", handlers.GoogleCallback)
 	http.HandleFunc("/github/login", handlers.GitHubLogin)
 	http.HandleFunc("/github/callback", handlers.GitHubCallback)
-
+	http.HandleFunc("/activity-page", handlers.GetUserActivity)
 	// Запуск сервера
 	log.Println("Сервер запущен на http://localhost:4000")
 	log.Fatal(http.ListenAndServe(":4000", nil))
