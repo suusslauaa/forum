@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"forum/database"
 	"forum/templates"
 	"html/template"
@@ -63,7 +62,8 @@ func ShowPromotionFormHandler(w http.ResponseWriter, r *http.Request) {
 	// Отображаем шаблон
 	err = tmpl.Execute(w, data)
 	if err != nil {
-		fmt.Println(err)
+		ErrorHandler(w, "Failed to render template", http.StatusInternalServerError)
+		return
 	}
 }
 
@@ -130,7 +130,11 @@ func SubmitPromotionRequestHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Отображаем шаблон подтверждения
-	tmpl.Execute(w, data)
+	err = tmpl.Execute(w, data)
+	if err != nil {
+		ErrorHandler(w, "Failed to render template", http.StatusInternalServerError)
+		return
+	}
 }
 
 func AdminPromotionRequestsHandler(w http.ResponseWriter, r *http.Request) {
@@ -185,7 +189,11 @@ func AdminPromotionRequestsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tmpl.Execute(w, data)
+	err = tmpl.Execute(w, data)
+	if err != nil {
+		ErrorHandler(w, "Failed to render template", http.StatusInternalServerError)
+		return
+	}
 }
 
 func ApproveRequestHandler(w http.ResponseWriter, r *http.Request) {

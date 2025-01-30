@@ -30,7 +30,7 @@ func UserListHandler(w http.ResponseWriter, r *http.Request) {
 	// Подключаемся к базе данных
 	db, err := database.InitDB()
 	if err != nil {
-		http.Error(w, "Database connection error", http.StatusInternalServerError)
+		ErrorHandler(w, "Database connection error", http.StatusInternalServerError)
 		return
 	}
 	defer db.Close()
@@ -38,7 +38,7 @@ func UserListHandler(w http.ResponseWriter, r *http.Request) {
 	// Проверяем роль пользователя (только admin может видеть страницу)
 	role, err := GetUserRole(db, UserID)
 	if err != nil {
-		http.Error(w, "Error fetching user role", http.StatusInternalServerError)
+		ErrorHandler(w, "Error fetching user role", http.StatusInternalServerError)
 		return
 	}
 	if role != "admin" {
@@ -55,17 +55,17 @@ func UserListHandler(w http.ResponseWriter, r *http.Request) {
 		case "promote":
 			_, err := db.Exec(`UPDATE users SET role = 'moderator' WHERE id = ? AND role = 'user'`, userID)
 			if err != nil {
-				http.Error(w, "Error promoting user", http.StatusInternalServerError)
+				ErrorHandler(w, "Error promoting user", http.StatusInternalServerError)
 				return
 			}
 		case "demote":
 			_, err := db.Exec(`UPDATE users SET role = 'user' WHERE id = ? AND role = 'moderator'`, userID)
 			if err != nil {
-				http.Error(w, "Error demoting user", http.StatusInternalServerError)
+				ErrorHandler(w, "Error demoting user", http.StatusInternalServerError)
 				return
 			}
 		default:
-			http.Error(w, "Invalid action", http.StatusBadRequest)
+			ErrorHandler(w, "Invalid action", http.StatusBadRequest)
 			return
 		}
 
@@ -76,7 +76,7 @@ func UserListHandler(w http.ResponseWriter, r *http.Request) {
 	// Получаем список пользователей
 	rows, err := db.Query("SELECT id, username, email, role FROM users ORDER BY role DESC")
 	if err != nil {
-		http.Error(w, "Error fetching users", http.StatusInternalServerError)
+		ErrorHandler(w, "Error fetching users", http.StatusInternalServerError)
 		return
 	}
 	defer rows.Close()
@@ -85,7 +85,7 @@ func UserListHandler(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var u User
 		if err := rows.Scan(&u.ID, &u.Username, &u.Email, &u.Role); err != nil {
-			http.Error(w, "Error scanning users", http.StatusInternalServerError)
+			ErrorHandler(w, "Error scanning users", http.StatusInternalServerError)
 			return
 		}
 		users = append(users, u)
@@ -94,13 +94,13 @@ func UserListHandler(w http.ResponseWriter, r *http.Request) {
 	// Загружаем шаблон
 	tmpl, err := template.ParseFS(templates.Files, "users.html")
 	if err != nil {
-		http.Error(w, "Template parsing error", http.StatusInternalServerError)
+		ErrorHandler(w, "Template parsing error", http.StatusInternalServerError)
 		return
 	}
 
 	// Отправляем данные в шаблон
 	err = tmpl.Execute(w, users)
 	if err != nil {
-		http.Error(w, "Template rendering error", http.StatusInternalServerError)
+		ErrorHandler(w, "Template rendering error", http.StatusInternalServerError)
 	}
 }

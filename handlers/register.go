@@ -28,7 +28,10 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		if checker != "" {
 			checker = ""
 		}
-		tmpl.Execute(w, data)
+		err = tmpl.Execute(w, data)
+		if err != nil {
+			ErrorHandler(w, "Template rendering error", http.StatusInternalServerError)
+		}
 		return
 	}
 

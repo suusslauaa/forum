@@ -36,14 +36,14 @@ func GoogleCallback(w http.ResponseWriter, r *http.Request) {
 	// Получаем код, который Google вернул
 	code := r.URL.Query().Get("code")
 	if code == "" {
-		http.Error(w, "Code not found", http.StatusBadRequest)
+		ErrorHandler(w, "Code not found", http.StatusBadRequest)
 		return
 	}
 
 	// Обмен кода на токен
 	token, err := oauth2Config.Exchange(context.Background(), code)
 	if err != nil {
-		http.Error(w, "Unable to get token", http.StatusInternalServerError)
+		ErrorHandler(w, "Unable to get token", http.StatusInternalServerError)
 		return
 	}
 
@@ -51,18 +51,18 @@ func GoogleCallback(w http.ResponseWriter, r *http.Request) {
 	client := oauth2Config.Client(context.Background(), token)
 	resp, err := client.Get("https://www.googleapis.com/oauth2/v3/userinfo")
 	if err != nil {
-		http.Error(w, "Unable to fetch user info", http.StatusInternalServerError)
+		ErrorHandler(w, "Unable to fetch user info", http.StatusInternalServerError)
 		return
 	}
 	defer resp.Body.Close()
 
 	// Декодируем информацию о пользователе
 	var userInfo struct {
-		Email string `json:"email"`
-		Name  string `json:"name"`
+		Email string
+		Name  string
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&userInfo); err != nil {
-		http.Error(w, "Unable to parse user info", http.StatusInternalServerError)
+		ErrorHandler(w, "Unable to parse user info", http.StatusInternalServerError)
 		return
 	}
 
@@ -72,7 +72,7 @@ func GoogleCallback(w http.ResponseWriter, r *http.Request) {
 	// Открываем соединение с базой данных
 	db, err := database.InitDB()
 	if err != nil {
-		http.Error(w, "Database connection error", http.StatusInternalServerError)
+		ErrorHandler(w, "Database connection error", http.StatusInternalServerError)
 		return
 	}
 	defer db.Close()
@@ -80,7 +80,7 @@ func GoogleCallback(w http.ResponseWriter, r *http.Request) {
 	// Проверяем, существует ли пользователь в базе данных
 	user, err := database.GetUserByEmail(db, userInfo.Email)
 	if err != nil {
-		http.Error(w, "Error checking user", http.StatusInternalServerError)
+		ErrorHandler(w, "Error checking user", http.StatusInternalServerError)
 		return
 	}
 
@@ -88,13 +88,13 @@ func GoogleCallback(w http.ResponseWriter, r *http.Request) {
 	if user == nil {
 		err = database.CreateUser(db, userInfo.Email, userInfo.Name, "defaultpassword", "user")
 		if err != nil {
-			http.Error(w, "Error creating user", http.StatusInternalServerError)
+			ErrorHandler(w, "Error creating user", http.StatusInternalServerError)
 			return
 		}
 		// Получаем созданного пользователя
 		user, err = database.GetUserByEmail(db, userInfo.Email)
 		if err != nil {
-			http.Error(w, "Error fetching user after creation", http.StatusInternalServerError)
+			ErrorHandler(w, "Error fetching user after creation", http.StatusInternalServerError)
 			return
 		}
 	}
@@ -134,14 +134,14 @@ func GitHubCallback(w http.ResponseWriter, r *http.Request) {
 	// Получаем код от GitHub
 	code := r.URL.Query().Get("code")
 	if code == "" {
-		http.Error(w, "Code not found", http.StatusBadRequest)
+		ErrorHandler(w, "Code not found", http.StatusBadRequest)
 		return
 	}
 
 	// Обмен кодом на токен
 	token, err := goauth2Config.Exchange(context.Background(), code)
 	if err != nil {
-		http.Error(w, "Unable to get token", http.StatusInternalServerError)
+		ErrorHandler(w, "Unable to get token", http.StatusInternalServerError)
 		return
 	}
 
@@ -151,7 +151,7 @@ func GitHubCallback(w http.ResponseWriter, r *http.Request) {
 	// Получаем информацию о пользователе
 	resp, err := client.Get("https://api.github.com/user")
 	if err != nil {
-		http.Error(w, "Unable to fetch user info", http.StatusInternalServerError)
+		ErrorHandler(w, "Unable to fetch user info", http.StatusInternalServerError)
 		return
 	}
 	defer resp.Body.Close()
@@ -162,7 +162,7 @@ func GitHubCallback(w http.ResponseWriter, r *http.Request) {
 		Email string `json:"email"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&userInfo); err != nil {
-		http.Error(w, "Unable to parse user info", http.StatusInternalServerError)
+		ErrorHandler(w, "Unable to parse user info", http.StatusInternalServerError)
 		return
 	}
 
@@ -172,7 +172,7 @@ func GitHubCallback(w http.ResponseWriter, r *http.Request) {
 	// Открываем соединение с базой данных
 	db, err := database.InitDB()
 	if err != nil {
-		http.Error(w, "Database connection error", http.StatusInternalServerError)
+		ErrorHandler(w, "Database connection error", http.StatusInternalServerError)
 		return
 	}
 	defer db.Close()
@@ -188,13 +188,13 @@ func GitHubCallback(w http.ResponseWriter, r *http.Request) {
 	if user == nil {
 		err = database.CreateUser(db, userInfo.Email, userInfo.Login, "defaultpassword", "user")
 		if err != nil {
-			http.Error(w, "Error creating user", http.StatusInternalServerError)
+			ErrorHandler(w, "Error creating user", http.StatusInternalServerError)
 			return
 		}
 		// Получаем созданного пользователя
 		user, err = database.GetUserByEmail(db, userInfo.Email)
 		if err != nil {
-			http.Error(w, "Error fetching user after creation", http.StatusInternalServerError)
+			ErrorHandler(w, "Error fetching user after creation", http.StatusInternalServerError)
 			return
 		}
 	}

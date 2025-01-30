@@ -24,7 +24,7 @@ func CategoryHandler(w http.ResponseWriter, r *http.Request) {
 	// Подключаемся к базе данных
 	db, err := database.InitDB()
 	if err != nil {
-		http.Error(w, "Database connection error", http.StatusInternalServerError)
+		ErrorHandler(w, "Database connection error", http.StatusInternalServerError)
 		return
 	}
 	defer db.Close()
@@ -32,7 +32,7 @@ func CategoryHandler(w http.ResponseWriter, r *http.Request) {
 	// Проверяем роль пользователя (только admin может видеть страницу)
 	role, err := GetUserRole(db, UserID)
 	if err != nil {
-		http.Error(w, "Error fetching user role", http.StatusInternalServerError)
+		ErrorHandler(w, "Error fetching user role", http.StatusInternalServerError)
 		return
 	}
 	if role != "admin" {
@@ -54,25 +54,25 @@ func CategoryHandler(w http.ResponseWriter, r *http.Request) {
 			newName := r.FormValue("name")
 			_, err := db.Exec("UPDATE categories SET name = ? WHERE id = ?", newName, categoryID)
 			if err != nil {
-				http.Error(w, "Error updating category", http.StatusInternalServerError)
+				ErrorHandler(w, "Error updating category", http.StatusInternalServerError)
 				return
 			}
 		case "delete":
 			categoryID := r.URL.Query().Get("id")
 			_, err := db.Exec("UPDATE posts SET category_id = NULL WHERE category_id = ?", categoryID)
 			if err != nil {
-				http.Error(w, "Error updating posts category", http.StatusInternalServerError)
+				ErrorHandler(w, "Error updating posts category", http.StatusInternalServerError)
 				return
 			}
 
 			// Удаляем категорию
 			_, err = db.Exec("DELETE FROM categories WHERE id = ?", categoryID)
 			if err != nil {
-				http.Error(w, "Error deleting category", http.StatusInternalServerError)
+				ErrorHandler(w, "Error deleting category", http.StatusInternalServerError)
 				return
 			}
 		default:
-			http.Error(w, "Invalid action", http.StatusBadRequest)
+			ErrorHandler(w, "Invalid action", http.StatusBadRequest)
 			return
 		}
 
@@ -84,7 +84,7 @@ func CategoryHandler(w http.ResponseWriter, r *http.Request) {
 	// Получаем список категорий
 	rows, err := db.Query("SELECT id, name FROM categories")
 	if err != nil {
-		http.Error(w, "Error fetching categories", http.StatusInternalServerError)
+		ErrorHandler(w, "Error fetching categories", http.StatusInternalServerError)
 		return
 	}
 	defer rows.Close()
@@ -100,7 +100,7 @@ func CategoryHandler(w http.ResponseWriter, r *http.Request) {
 			Name string
 		}
 		if err := rows.Scan(&category.ID, &category.Name); err != nil {
-			http.Error(w, "Error scanning categories", http.StatusInternalServerError)
+			ErrorHandler(w, "Error scanning categories", http.StatusInternalServerError)
 			return
 		}
 		categories = append(categories, category)
@@ -109,7 +109,7 @@ func CategoryHandler(w http.ResponseWriter, r *http.Request) {
 	// Загружаем HTML-шаблон
 	tmpl, err := template.ParseFS(templates.Files, "categories.html")
 	if err != nil {
-		http.Error(w, "Template parsing error", http.StatusInternalServerError)
+		ErrorHandler(w, "Template parsing error", http.StatusInternalServerError)
 		return
 	}
 
@@ -123,6 +123,6 @@ func CategoryHandler(w http.ResponseWriter, r *http.Request) {
 	// Отправляем данные в шаблон
 	err = tmpl.Execute(w, data)
 	if err != nil {
-		http.Error(w, "Template rendering error", http.StatusInternalServerError)
+		ErrorHandler(w, "Template rendering error", http.StatusInternalServerError)
 	}
 }
