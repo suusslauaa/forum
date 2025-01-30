@@ -80,6 +80,7 @@ func EditPostHandler(w http.ResponseWriter, r *http.Request) {
 			ErrorHandler(w, "Template parsing error", http.StatusInternalServerError)
 			return
 		}
+		
 		data := map[string]interface{}{
 			"Username": username,
 			"Moders":   Moders,
@@ -87,7 +88,7 @@ func EditPostHandler(w http.ResponseWriter, r *http.Request) {
 			"Admin":    admin,
 			"Category": categories,
 			"Check":    checker,
-			"post":     post,
+			"Post":     post,
 		}
 		if checker != "" {
 			checker = ""

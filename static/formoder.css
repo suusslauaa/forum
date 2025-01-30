@@ -99,6 +99,8 @@ header {
     z-index: 10;
 }
 
+
+
 .circle:hover .dropdown {
     display: block;
 }
@@ -206,4 +208,28 @@ header {
     text-decoration: none;
     font-weight: bold;
     transition: opacity 0.3s;
+}
+
+.circle::after {
+    content: "▼"; /* Иконка стрелки вниз */
+    position: absolute;
+    bottom: -20px; /* Расположение под кругом */
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 14px;
+    color: #007bff;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.circle:hover::after {
+    opacity: 1; /* Показываем стрелку при наведении */
+}
+
+.dropdown-link {
+    color: black;
+}
+
+.dropdown a {
+    color: black;
 }

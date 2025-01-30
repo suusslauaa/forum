@@ -1,45 +1,45 @@
 <!DOCTYPE html>
-<link rel="stylesheet" href="../static/edit_post.css">
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Post</title>
+    <link rel="stylesheet" href="../static/edit_post.css"> <!-- Используем тот же CSS, что и для create_post -->
 </head>
 <body>
     <header>
-        <nav class="nav">
-            <a href="/" class="auth-link">Home</a>
-            <a href="/my-posts" class="auth-link">My Posts</a>
-            <a href="/liked-posts" class="auth-link">Liked Posts</a>
-            {{if or .Moder .Admin}}
-            {{else}}
-            <a href="/gomoder" class="auth-link">Want Moder</a>
-            {{end}}
-            {{if .Admin}}
-            <a href="/reports" class="auth-link">Reports</a>
-            <a href="/requests" class="auth-link">Request</a>
-            <a href="/categories" class="auth-link">Category</a>
-            <a href="/users" class="auth-link">Users</a>
-            {{end}}
-        </nav>
-        <h1>SOSAL?</h1>
-        <div class="create-post">
-            <div class="nav2">
-                <a href="/create-post" class="auth-link">Create Post</a>
+        <div class="forum">
+            <a href="/">FORUM</a>
+        </div>
+        <nav class="heddy">
+            <div class="left">
+                <a href="/my-posts">My Posts</a>
+                <a href="/liked-posts">Liked Posts</a>
+                {{if or .Moders .Admin}}
+                {{else}}
+                <a href="/gomoder">Want Moder</a>
+                {{end}}
+                {{if .Admin}}
+                <a href="/reports">Reports</a>
+                <a href="/requests">Request</a>
+                <a href="/categories">Category</a>
+                <a href="/users">Users</a>
+                {{end}}
             </div>
-            <div class="nav2">
-                <a href="/notifications" class="auth-link">Notifications</a>
-            </div>      
-            <div class="nav2">
-                <a href="/activity-page" class="auth-link">Activity Page</a>
-            </div>         
-            <div class="circle">{{.UserID}}
-                <div class="dropdown">
-                    <a href="/logout" class="dropdown-link">Logout</a>
+            <div class="right">
+                <a href="/create-post">Create Post</a>
+                <a href="/notifications">Notifications</a>
+                <a href="/activity-page">Activity Page</a>
+                <div class="user-menu">
+                    <div class="circle">
+                        {{.Username}}
+                        <div class="dropdown">
+                            <a href="/logout">Logout</a>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </nav>
     </header>
     <main>
         <section class="content">
@@ -55,7 +55,7 @@
                 <label for="category" class="form-label">Category:</label>
                 <select id="category" name="category" class="form-select">
                     <option value="{{.Post.CategoryID}}" hidden>{{.Post.Category}}</option>
-                    {{range .Categories}}
+                    {{range .Category}}
                     <option value="{{.ID}}">{{.Name}}</option>
                     {{end}}
                     <option value="">No Category</option>
@@ -68,7 +68,7 @@
                 </div>
                 {{end}}
                 <input type="file" id="image" name="image" class="form-input" accept="image/*">
-                <input type="hidden" name="user_id" value="{{.UserID}}">
+                <input type="hidden" name="user_id" value="{{.UserId}}">
                 <button type="submit" class="create-post-button">Save</button>
             </form>
         </section>

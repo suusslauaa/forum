@@ -14,7 +14,6 @@ header {
     color: white;
     padding: 15px 20px;
     display: flex;
-    flex-direction: column;
     align-items: center;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
@@ -26,6 +25,7 @@ header {
     max-width: 1200px;
     align-items: center;
     margin-top: 10px;
+    margin-left: 250px;
 }
 
 .forum {
@@ -335,4 +335,20 @@ main {
         flex-direction: column;
         gap: 10px;
     }
+}
+
+.circle::after {
+    content: "▼"; /* Иконка стрелки вниз */
+    position: absolute;
+    bottom: -20px; /* Расположение под кругом */
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 14px;
+    color: #007bff;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.circle:hover::after {
+    opacity: 1; /* Показываем стрелку при наведении */
 }
