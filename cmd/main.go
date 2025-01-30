@@ -38,6 +38,7 @@ func main() {
 	http.HandleFunc("/logout", handlers.LogoutHandler)
 	http.HandleFunc("/create-post", handlers.CreatePostHandler)
 	http.HandleFunc("/notifications", handlers.NotificationsHandler)
+	http.HandleFunc("/notifications/read", handlers.ReadNotificationsHandler)
 	http.HandleFunc("/edit-post", handlers.EditPostHandler)
 	http.HandleFunc("/post", handlers.PostHandler)
 	http.HandleFunc("/my-posts", handlers.UserPostHandler)
@@ -58,6 +59,6 @@ func main() {
 	http.HandleFunc("/users", handlers.UserListHandler)
 
 	// Запуск сервера
-	log.Println("Сервер запущен на http://localhost:4000")
-	log.Fatal(http.ListenAndServe(":4000", nil))
+	log.Println("Сервер запущен на https://localhost:4000")
+	log.Fatal(http.ListenAndServeTLS(":4000", "tls/cert.pem", "tls/key.pem", nil))
 }

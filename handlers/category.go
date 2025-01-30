@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"forum/database"
+	"forum/templates"
 	"html/template"
 	"log"
 	"net/http"
@@ -100,7 +101,7 @@ func CategoryHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Загружаем HTML-шаблон
-	tmpl, err := template.ParseFiles("templates/categories.html")
+	tmpl, err := template.ParseFS(templates.Files, "categories.html")
 	if err != nil {
 		http.Error(w, "Template parsing error", http.StatusInternalServerError)
 		log.Println("Ошибка загрузки шаблона:", err)

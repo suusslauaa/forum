@@ -26,8 +26,8 @@
                 <a href="/create-post" class="auth-link">Create Post</a>
             </div>   
             <div class="nav2">
-                <a href="/notifications/read" class="auth-link">Archive</a>
-            </div> 
+                <a href="/notifications" class="auth-link">Notifications</a>
+            </div>      
             <div class="nav2">
                 <a href="/activity-page" class="auth-link">Activity Page</a>
             </div>                                         
@@ -42,7 +42,6 @@
         {{range .Activities}}
         <div class="post-container">
             {{if .IsRead}}
-            {{else}}
             <div class="post-title">{{.Type}}</div>
             <div class="timestamp">Created At: {{.CreatedAt}}</div>
             {{if .CommentContent}}
@@ -50,10 +49,7 @@
             {{end}}
             {{if .PostID}}
             <a href="/post?id={{.PostID}}" class="post-content">View Post</a>
-            <form method="post" action="/notifications?action=read&id={{.ID}}">
-                <button type="submit" class="delete-button">Mark as Read</button>
-            </form>
-            {{end}}  
+            {{end}}
             {{end}}
         </div>
         {{end}}

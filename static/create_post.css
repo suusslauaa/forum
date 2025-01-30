@@ -13,20 +13,21 @@ body {
 }
 
 header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 70px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 10px 20px;
     background-color: #007bff;
     color: white;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 70px;
     z-index: 1000;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
+
 
 header .nav a {
     color: white;
@@ -42,16 +43,16 @@ header .create-post {
 
 main {
     display: flex;
+    flex-direction: column;
+    justify-content: center; /* Вертикальное центрирование */
+    align-items: center;     /* Горизонтальное центрирование */
     flex: 1;
-    margin-top: 70px;
-    justify-content: center; /* Горизонтальное центрирование */
-    align-items: center;    /* Вертикальное центрирование (опционально) */
-    flex-direction: column; /* Содержимое располагается столбцом */
-    margin: 0 auto;
+    margin-top: 70px; /* Высота header */
+    padding: 20px;
     width: 100%;
-    max-width: 1200px;      /* Ограничение ширины для основного контента */
-    padding: 20px;          /* Внутренний отступ для эстетики */
-    box-sizing: border-box; /* Учет отступов и рамок */
+    max-width: 1200px;
+    box-sizing: border-box;
+    margin: 0 auto;
 }
 
 .sidebar {
@@ -380,45 +381,4 @@ main {
     transform: translateY(1px);
 }
 
-body {
-    font-family: Arial, sans-serif;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    background-color: #f9f9f9;
-}
 
-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 70px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: white;
-    z-index: 1000;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-}
-
-header .nav a {
-    color: white;
-    text-decoration: none;
-    margin-right: 15px;
-}
-
-header .create-post {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-main {
-    display: flex;
-    flex: 1;
-    margin: 20px;
-    margin-top: 200px;
-}

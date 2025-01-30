@@ -3,6 +3,7 @@ package handlers
 import (
 	"database/sql"
 	"forum/database" // Импортируй правильный путь к database
+	"forum/templates"
 	"html/template"
 	"log"
 	"net/http"
@@ -119,7 +120,7 @@ func ReportsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Загружаем HTML-шаблон
-	tmpl, err := template.ParseFiles("templates/reports.html")
+	tmpl, err := template.ParseFS(templates.Files, "reports.html")
 	if err != nil {
 		http.Error(w, "Template parsing error", http.StatusInternalServerError)
 		log.Println("Ошибка загрузки шаблона:", err)

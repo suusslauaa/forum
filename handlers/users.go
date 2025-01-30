@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"forum/database"
+	"forum/templates"
 	"html/template"
 	"log"
 	"net/http"
@@ -95,7 +96,7 @@ func UserListHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Загружаем шаблон
-	tmpl, err := template.ParseFiles("templates/users.html")
+	tmpl, err := template.ParseFS(templates.Files, "users.html")
 	if err != nil {
 		http.Error(w, "Template parsing error", http.StatusInternalServerError)
 		log.Println("Ошибка загрузки шаблона:", err)

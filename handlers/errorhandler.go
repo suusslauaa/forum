@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"forum/templates"
 	"html/template"
 	"net/http"
 )
@@ -15,7 +16,7 @@ func ErrorHandler(w http.ResponseWriter, message string, code int) {
 	w.WriteHeader(code)
 
 	// Загружаем шаблон ошибки
-	tmpl, tmplErr := template.ParseFiles("templates/error.html")
+	tmpl, tmplErr := template.ParseFS(templates.Files, "error.html")
 	if tmplErr != nil {
 		// Если шаблон не загрузился, выводим простой текст ошибки
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)

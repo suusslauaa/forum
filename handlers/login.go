@@ -2,9 +2,11 @@ package handlers
 
 import (
 	"forum/database"
-	"github.com/gofrs/uuid"
+	"forum/templates"
 	"html/template"
 	"net/http"
+
+	"github.com/gofrs/uuid"
 )
 
 // LoginRequest структура для логина
@@ -19,7 +21,7 @@ var checker string
 // LoginHandler обрабатывает запросы на логин
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
-		tmpl, err := template.ParseFiles("templates/login.html")
+		tmpl, err := template.ParseFS(templates.Files, "login.html")
 		if err != nil {
 			ErrorHandler(w, "Template loading error", http.StatusInternalServerError)
 			return

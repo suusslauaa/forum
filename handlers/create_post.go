@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"forum/database"
+	"forum/templates"
 	"html/template"
 	"io"
 	"net/http"
@@ -43,7 +44,7 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Передаем категории в шаблон
-		tmpl, err := template.ParseFiles("templates/create_post.html")
+		tmpl, err := template.ParseFS(templates.Files, "create_post.html")
 		if err != nil {
 			ErrorHandler(w, "Template parsing error", http.StatusInternalServerError)
 			return

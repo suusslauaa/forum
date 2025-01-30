@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"forum/database"
+	"forum/templates"
 	"html/template"
 	"log"
 	"net/http"
@@ -318,7 +319,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Загружаем шаблон и передаем данные
-	tmpl, err := template.ParseFiles("./templates/home.html")
+	tmpl, err := template.ParseFS(templates.Files, "home.html")
 	if err != nil {
 		ErrorHandler(w, err.Error(), http.StatusInternalServerError)
 		return

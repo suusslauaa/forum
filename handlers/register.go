@@ -2,9 +2,11 @@ package handlers
 
 import (
 	"forum/database"
-	"golang.org/x/crypto/bcrypt"
+	"forum/templates"
 	"html/template"
 	"net/http"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type RegisterRequest struct {
@@ -16,7 +18,7 @@ type RegisterRequest struct {
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		// Рендерим HTML-форму для регистрации
-		tmpl, err := template.ParseFiles("templates/register.html")
+		tmpl, err := template.ParseFS(templates.Files, "register.html")
 		if err != nil {
 			ErrorHandler(w, "Template loading error", http.StatusInternalServerError)
 			return

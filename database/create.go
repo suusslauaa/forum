@@ -246,7 +246,7 @@ func ToggleDislike(db *sql.DB, postID, userID int) error {
 			post, _ := GetPostByID(db, postID)
 			_, err = db.Exec(query, post.AuthorID, postID)
 		}
-		
+
 		return err
 	}
 }
@@ -288,7 +288,7 @@ func AddComment(db *sql.DB, postID, userID int, content string) error {
 		query = `INSERT INTO notifications (user_id, notification_type, post_id, comment_content, created_at) 
 	VALUES ($1, 'You received a comment', $2, $3, CURRENT_TIMESTAMP)`
 
-		_, err = db.Exec(query, post.AuthorID, content, postID)
+		_, err = db.Exec(query, post.AuthorID, post.ID, content, postID)
 	}
 	return err
 }
@@ -324,4 +324,12 @@ func UpdatePostStatus(db *sql.DB, postID int, newStatus string) error {
 		return err
 	}
 	return nil
+}
+
+func ReadNotification(db *sql.DB, ID int) {
+	fmt.Println(ID)
+	_, err := db.Exec("UPDATE notifications SET is_read = 1 WHERE id = ?", ID)
+	if err != nil {
+		log.Println(err)
+	}
 }

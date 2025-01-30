@@ -3,6 +3,7 @@ package handlers
 import (
 	"database/sql"
 	"forum/database"
+	"forum/templates"
 	"html/template"
 	"log"
 	"net/http"
@@ -94,7 +95,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Загружаем шаблон и передаем данные
-	tmpl, err := template.ParseFiles("templates/post.html")
+	tmpl, err := template.ParseFS(templates.Files, "post.html")
 	if err != nil {
 		ErrorHandler(w, "Template parsing error", http.StatusInternalServerError)
 		return
