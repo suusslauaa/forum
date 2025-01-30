@@ -288,13 +288,15 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		admin = true
 	}
 
-	categoryID := 0
+	var categoryID *int
+	categoryParam := r.URL.Query().Get("category_id")
 	if r.URL.Query().Get("category_id") != "" {
-		categoryID, err = strconv.Atoi(r.URL.Query().Get("category_id"))
+		id, err := strconv.Atoi(categoryParam)
 		if err != nil {
 			ErrorHandler(w, "Invalid category ID", http.StatusBadRequest)
 			return
 		}
+		categoryID = &id // Передаём указатель, если категория выбрана
 	}
 
 	// Получаем посты из базы данных

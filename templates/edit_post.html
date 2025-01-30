@@ -48,6 +48,7 @@
                     {{range .Categories}}
                     <option value="{{.ID}}">{{.Name}}</option>
                     {{end}}
+                    <option value="">No Category</option>
                 </select>
                 <label for="image" class="form-label">Upload Image:</label>
                 {{if .Post.ImagePath}}

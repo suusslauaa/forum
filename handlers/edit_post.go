@@ -91,10 +91,17 @@ func EditPostHandler(w http.ResponseWriter, r *http.Request) {
 		title := r.FormValue("title")
 		content := r.FormValue("content")
 		userID := r.FormValue("user_id")
-		categoryID, err := strconv.Atoi(r.FormValue("category"))
-		if err != nil {
-			ErrorHandler(w, "Invalid category ID", http.StatusBadRequest)
-			return
+		categoryIDstr := r.FormValue("category")
+		var categoryID *int
+		if categoryIDstr == "" {
+			categoryID = nil
+		} else {
+			ID, err := strconv.Atoi(categoryIDstr)
+			if err != nil {
+				ErrorHandler(w, "Invalid category ID", http.StatusBadRequest)
+				return
+			}
+			categoryID = &ID
 		}
 
 		if title == "" || content == "" || userID == "" {

@@ -60,7 +60,14 @@ func CategoryHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		case "delete":
 			categoryID := r.URL.Query().Get("id")
-			_, err := db.Exec("DELETE FROM categories WHERE id = ?", categoryID)
+			_, err := db.Exec("UPDATE posts SET category_id = NULL WHERE category_id = ?", categoryID)
+			if err != nil {
+				http.Error(w, "Error updating posts category", http.StatusInternalServerError)
+				return
+			}
+
+			// Удаляем категорию
+			_, err = db.Exec("DELETE FROM categories WHERE id = ?", categoryID)
 			if err != nil {
 				http.Error(w, "Error deleting category", http.StatusInternalServerError)
 				return

@@ -31,7 +31,7 @@ func CreateCategory(db *sql.DB, name string) error {
 	return err
 }
 
-func EditPost(db *sql.DB, title, content string, categoryID int, createdAt string, id int, savePath string) error {
+func EditPost(db *sql.DB, title, content string, categoryID *int, createdAt string, id int, savePath string) error {
 	query := `
 		UPDATE posts 
 		SET title = ?, content = ?, category_id = ?, created_at = ?, image_path = ?
@@ -61,7 +61,7 @@ func DeleteCategory(db *sql.DB, id int) error {
 }
 
 // CreatePost создает новый пост, привязанный к категории
-func CreatePost(db *sql.DB, title, content string, authorID, categoryID int, createdAt, imagePath string) error {
+func CreatePost(db *sql.DB, title, content string, authorID int, categoryID *int, createdAt, imagePath string) error {
 	query := `INSERT INTO posts (title, content, author_id, category_id, created_at, image_path) 
 				VALUES ($1, $2, $3, $4, $5, $6) RETURNING id;`
 
@@ -79,9 +79,15 @@ func CreatePost(db *sql.DB, title, content string, authorID, categoryID int, cre
 	} else {
 		imgPath = imagePath
 	}
+	var catID interface{}
+	if categoryID == nil {
+		catID = nil
+	} else {
+		catID = *categoryID
+	}
 
 	// Выполняем запрос и получаем ID вставленного поста
-	err = db.QueryRow(query, title, content, authorID, categoryID, createdAt, imgPath).Scan(&postID)
+	err = db.QueryRow(query, title, content, authorID, catID, createdAt, imgPath).Scan(&postID)
 	if err != nil {
 		return err
 	}

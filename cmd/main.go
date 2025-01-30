@@ -1,8 +1,11 @@
 package main
 
 import (
+	"crypto/tls"
 	"forum/database"
 	"forum/handlers"
+	tlsecurity "forum/tls"
+	"io/fs"
 	"log"
 	"net/http"
 
@@ -19,15 +22,10 @@ func main() {
 	// Создание категорий и постов (если нужно)
 	database.CreateCategory(db, "General")
 	database.CreateCategory(db, "Technology")
-	//err = database.CreateUser(db, "user@example.com", "username123", "password123")
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//err = database.CreatePost(db, "First Post", "This is the content of the first post.", 1, 1, time.Now().Format("2006-01-02 15:04:05"))
-	//if err != nil {
-	//	print("sosal?")
-	//	log.Fatal(err) // Логируем и завершаем программу в случае ошибки
-	//}
+	// err = database.CreateUser(db, "user@example.com", "username123", "password123", "admin")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
 	// Настройка обработчиков HTTP
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
@@ -57,8 +55,36 @@ func main() {
 	http.HandleFunc("/reports", handlers.ReportsHandler)
 	http.HandleFunc("/categories", handlers.CategoryHandler)
 	http.HandleFunc("/users", handlers.UserListHandler)
+	certData, err := fs.ReadFile(tlsecurity.Pems, "cert.pem")
+	if err != nil {
+		log.Fatal("Failed to read TLS certificate", "error", err)
+	}
+	keyData, err := fs.ReadFile(tlsecurity.Pems, "key.pem")
+	if err != nil {
+		log.Fatal("Failed to read TLS key", "error", err)
+	}
+	cert, err := tls.X509KeyPair(certData, keyData)
+	if err != nil {
+		log.Fatal("Ошибка создания сертификата:", err)
+	}
 
+	server := &http.Server{
+		Addr: ":4000",
+		TLSConfig: &tls.Config{
+			Certificates:     []tls.Certificate{cert},
+			CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
+			MinVersion:       tls.VersionTLS12,
+			CipherSuites: []uint16{
+				tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+				tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+				tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,
+				tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,
+				tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+				tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+			},
+		},
+	}
 	// Запуск сервера
 	log.Println("Сервер запущен на https://localhost:4000")
-	log.Fatal(http.ListenAndServeTLS(":4000", "tls/cert.pem", "tls/key.pem", nil))
+	log.Fatal(server.ListenAndServeTLS("", ""))
 }

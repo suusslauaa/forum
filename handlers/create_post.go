@@ -20,7 +20,7 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, loggedIn := store[sessionID.Value]
+	username, loggedIn := store[sessionID.Value]
 	if !loggedIn {
 		http.Redirect(w, r, "/login", http.StatusFound)
 		return
@@ -51,10 +51,12 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		data := struct {
+			Username   string
 			UserID     int
 			Categories []database.Category
 			Check      string
 		}{
+			Username:   username,
 			UserID:     loggedInUserID, // Получите ID пользователя из сессии
 			Categories: categories,
 			Check:      checker,
@@ -75,10 +77,16 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		title := r.FormValue("title")
 		content := r.FormValue("content")
 		userID := id[sessionID.Value]
-		categoryID, err := strconv.Atoi(r.FormValue("category"))
-		if err != nil {
-			ErrorHandler(w, "Invalid category ID", http.StatusBadRequest)
-			return
+
+		categoryStr := r.FormValue("category")
+		var categoryID *int // Указатель на int (чтобы можно было передавать nil)
+		if categoryStr != "" {
+			catID, err := strconv.Atoi(categoryStr)
+			if err != nil {
+				ErrorHandler(w, "Invalid category ID", http.StatusBadRequest)
+				return
+			}
+			categoryID = &catID // Присваиваем значение указателю
 		}
 
 		if title == "" || content == "" {
@@ -103,9 +111,8 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Получаем файл из формы
-		file, handler, err := r.FormFile("image")
 		var savePath string
-		// Проверяем, был ли файл загружен
+		file, handler, err := r.FormFile("image")
 		if err != nil && err != http.ErrMissingFile {
 			http.Error(w, "Error retrieving file", http.StatusBadRequest)
 			return
@@ -113,8 +120,6 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 
 		if file != nil {
 			defer file.Close()
-
-			// Опционально: проверка расширения
 			allowedExtensions := map[string]bool{
 				".jpg": true, ".jpeg": true, ".png": true, ".gif": true,
 			}

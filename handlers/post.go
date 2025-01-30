@@ -230,7 +230,7 @@ func UserPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Загружаем шаблон для отображения постов
-	tmpl, err := template.ParseFiles("templates/my_posts.html")
+	tmpl, err := template.ParseFS(templates.Files, "my_posts.html")
 	if err != nil {
 		ErrorHandler(w, "Template parsing error", http.StatusInternalServerError)
 		return
@@ -295,7 +295,7 @@ func LikePostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Загружаем шаблон для отображения постов
-	tmpl, err := template.ParseFiles("templates/my_posts.html")
+	tmpl, err := template.ParseFS(templates.Files, "my_posts.html")
 	if err != nil {
 		ErrorHandler(w, "Template parsing error", http.StatusInternalServerError)
 		return
@@ -539,7 +539,7 @@ func GetUserActivity(w http.ResponseWriter, r *http.Request) {
 		activities = append(activities, activity)
 	}
 
-	tmpl, err := template.ParseFiles("templates/activity_page.html")
+	tmpl, err := template.ParseFS(templates.Files, "activity_page.html")
 	if err != nil {
 		log.Println("Error loading template:", err)
 		http.Error(w, "Failed to load template", http.StatusInternalServerError)

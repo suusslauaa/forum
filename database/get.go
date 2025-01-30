@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"log"
 )
 
@@ -23,7 +24,7 @@ type Post struct {
 	Content      string
 	AuthorID     int
 	Author       string
-	CategoryID   int
+	CategoryID   *int
 	Category     string
 	LikeCount    int
 	DislikeCount int
@@ -42,10 +43,10 @@ func GetPostByID(db *sql.DB, postID int) (Post, error) {
 			p.content, 
 			u.username AS author, 
 			p.category_id, 
-			IFNULL(c.name, '') AS category, 
+			COALESCE(c.name, '') AS category,
 			p.liked AS like_count, 
 			p.disliked AS dislike_count, 
-			IFNULL(p.image_path, '') AS image,
+			COALESCE(p.image_path, '') AS image,
 			p.author_id 
 		FROM posts p
 		LEFT JOIN categories c ON p.category_id = c.id
@@ -59,7 +60,7 @@ func GetPostByID(db *sql.DB, postID int) (Post, error) {
 	err := row.Scan(&post.ID, &post.Title, &post.Content, &post.Author, &post.CategoryID, &post.Category, &post.LikeCount, &post.DislikeCount, &post.ImagePath, &post.AuthorID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return post, errors.New("post not found")
+			return post, fmt.Errorf("post with ID %d not found", postID)
 		}
 		log.Printf("Error scanning row: %v", err)
 		return post, err
@@ -82,7 +83,7 @@ func GetPostByID(db *sql.DB, postID int) (Post, error) {
 
 	rows, err := db.Query(commentsQuery, postID)
 	if err != nil {
-		log.Printf("Error querying comments: %v", err)
+		log.Printf("error querying comments: %v", err)
 		return post, err
 	}
 	defer rows.Close()
@@ -92,25 +93,30 @@ func GetPostByID(db *sql.DB, postID int) (Post, error) {
 		var comment Comment
 		err := rows.Scan(&comment.ID, &comment.PostID, &comment.UserID, &comment.Content, &comment.CreatedAt, &comment.LikeCount, &comment.DislikeCount, &comment.Author)
 		if err != nil {
-			log.Printf("Error scanning comment: %v", err)
-			return post, err
+			log.Printf("skipping comment due to error: %v", err) // Логируем ошибку, но не прерываем выполнение
+			continue
 		}
 		post.Comments = append(post.Comments, comment)
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Printf("Error iterating comments: %v", err)
+		return post, err
 	}
 
 	return post, nil
 }
 
-func GetPosts(db *sql.DB, categoryID int) ([]Post, error) {
+func GetPosts(db *sql.DB, categoryID *int) ([]Post, error) {
 	var rows *sql.Rows
 	var err error
 
-	if categoryID > 0 {
+	if categoryID != nil {
 		rows, err = db.Query(`
 			SELECT p.id, p.title, p.content, c.name 
 			FROM posts p
 			LEFT JOIN categories c ON p.category_id = c.id
-			WHERE p.category_id = ?`, categoryID)
+			WHERE p.category_id = ?`, *categoryID)
 	} else {
 		rows, err = db.Query(`
 			SELECT p.id, p.title, p.content, c.name 
@@ -126,12 +132,12 @@ func GetPosts(db *sql.DB, categoryID int) ([]Post, error) {
 	var posts []Post
 	for rows.Next() {
 		var post Post
-		var categoryName string
+		var categoryName sql.NullString
 		err := rows.Scan(&post.ID, &post.Title, &post.Content, &categoryName)
 		if err != nil {
 			return nil, err
 		}
-		post.Category = categoryName
+		post.Category = categoryName.String
 		posts = append(posts, post)
 	}
 

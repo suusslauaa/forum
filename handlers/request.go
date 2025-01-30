@@ -85,7 +85,7 @@ func SubmitPromotionRequestHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Загружаем шаблон с подтверждением подачи заявки
-	tmpl, err := template.ParseFiles("./templates/formoders.html")
+	tmpl, err := template.ParseFS(templates.Files, "formoders.html")
 	if err != nil {
 		ErrorHandler(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -135,7 +135,7 @@ func AdminPromotionRequestsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Загружаем шаблон и передаем данные
-	tmpl, err := template.ParseFiles("./templates/admin_promotion_requests.html")
+	tmpl, err := template.ParseFS(templates.Files, "admin_promotion_requests.html")
 	if err != nil {
 		ErrorHandler(w, err.Error(), http.StatusInternalServerError)
 		return

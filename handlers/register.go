@@ -23,7 +23,19 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			ErrorHandler(w, "Template loading error", http.StatusInternalServerError)
 			return
 		}
-		tmpl.Execute(w, nil)
+		data := struct {
+			Check string
+		}{
+			Check: checker,
+		}
+		if checker != "" {
+			checker = ""
+		}
+		err = tmpl.Execute(w, data)
+		if err != nil {
+			ErrorHandler(w, "Error rendering template", http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 
