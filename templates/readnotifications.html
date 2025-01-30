@@ -12,12 +12,15 @@
             <a href="/" class="auth-link">Home</a>
             <a href="/my-posts" class="auth-link">My Posts</a>
             <a href="/liked-posts" class="auth-link">Liked Posts</a>
+            {{if or .Moder .Admin}}
+            {{else}}
             <a href="/gomoder" class="auth-link">Want Moder</a>
-            {{if .Moder}}
-            <a href="/posts/unapproved" class="auth-link">Un Approved</a>
             {{end}}
             {{if .Admin}}
-            <a href="/requests" class="auth-link">request</a>
+            <a href="/reports" class="auth-link">Reports</a>
+            <a href="/requests" class="auth-link">Request</a>
+            <a href="/categories" class="auth-link">Category</a>
+            <a href="/users" class="auth-link">Users</a>
             {{end}}
         </nav>
         <h1>SOSAL?</h1>

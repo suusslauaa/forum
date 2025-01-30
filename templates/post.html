@@ -13,7 +13,16 @@
         <a href="/" class="auth-link">Home</a>
         <a href="/my-posts" class="auth-link">My Posts</a>
         <a href="/liked-posts" class="auth-link">Liked Posts</a>
+        {{if or .Moder .Admin}}
+        {{else}}
         <a href="/gomoder" class="auth-link">Want Moder</a>
+        {{end}}
+        {{if .Admin}}
+        <a href="/reports" class="auth-link">Reports</a>
+        <a href="/requests" class="auth-link">Request</a>
+        <a href="/categories" class="auth-link">Category</a>
+        <a href="/users" class="auth-link">Users</a>
+        {{end}}
     </nav>
     <div class="create-post">
         <a href="/create-post" class="auth-link">Create Post</a>
