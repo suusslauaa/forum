@@ -124,9 +124,11 @@ func ReportsHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println("Ошибка загрузки шаблона:", err)
 		return
 	}
-
+	data := map[string]interface{}{
+		"Reports": reports,
+	}
 	// Отправляем данные в шаблон
-	err = tmpl.Execute(w, reports)
+	err = tmpl.Execute(w, data)
 	if err != nil {
 		http.Error(w, "Template rendering error", http.StatusInternalServerError)
 		log.Println("Ошибка рендеринга:", err)

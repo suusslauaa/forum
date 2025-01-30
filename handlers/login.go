@@ -26,14 +26,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			ErrorHandler(w, "Template loading error", http.StatusInternalServerError)
 			return
 		}
-
-		data := struct {
-			Check string
-		}{
-			Check: checker,
-		}
-		if checker != "" {
-			checker = ""
+		data := map[string]interface{}{
+			"Check": checker,
 		}
 		err = tmpl.Execute(w, data)
 		if err != nil {

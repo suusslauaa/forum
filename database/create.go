@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"strconv"
 
 	"golang.org/x/crypto/bcrypt"
 )

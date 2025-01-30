@@ -24,7 +24,11 @@ func GetUserActivity(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	}
 
-	// _, loggedIn := store[sessionID.Value]
+	username, loggedIn := store[sessionID.Value]
+	if !loggedIn {
+		http.Redirect(w, r, "/login", http.StatusFound)
+		return
+	}
 
 	// Получаем ID пользователя по имени
 	userID, _ := id[sessionID.Value]
@@ -44,11 +48,25 @@ func GetUserActivity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer db.Close()
-
+	var role string
+	role, err = GetUserRole(db, userID)
+	if err != nil {
+		ErrorHandler(w, "Error fetching user role", http.StatusInternalServerError)
+		return
+	}
 	rows, err := db.Query(query, userID)
 	if err != nil {
 		http.Error(w, "Database query failed", http.StatusInternalServerError)
 		return
+	}
+	Moders := false
+	if role == "moder" || role == "admin" {
+		Moders = true
+	}
+
+	admin := false
+	if role == "admin" {
+		admin = true
 	}
 	defer rows.Close()
 
@@ -73,6 +91,9 @@ func GetUserActivity(w http.ResponseWriter, r *http.Request) {
 	// Передаем данные в шаблон
 	data := map[string]interface{}{
 		"Activities": activities,
+		"Username":   username,
+		"Moders":     Moders,
+		"Admin":      admin,
 	}
 
 	err = tmpl.Execute(w, data)

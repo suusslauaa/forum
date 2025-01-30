@@ -15,7 +15,7 @@ func CategoryHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	}
 
-	_, loggedIn := store[sessionID.Value]
+	username, loggedIn := store[sessionID.Value]
 	UserID := id[sessionID.Value]
 	if !loggedIn {
 		http.Redirect(w, r, "/login", http.StatusFound)
@@ -41,6 +41,8 @@ func CategoryHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
+	Moders := true
+	admin := true
 
 	// Обработка POST-запросов (создание, редактирование, удаление)
 	if r.Method == http.MethodPost {
@@ -114,8 +116,15 @@ func CategoryHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	data := map[string]interface{}{
+		"Username": username,
+		"Moders":   Moders,
+		"Admin":    admin,
+		"Category": categories,
+	}
+
 	// Отправляем данные в шаблон
-	err = tmpl.Execute(w, categories)
+	err = tmpl.Execute(w, data)
 	if err != nil {
 		http.Error(w, "Template rendering error", http.StatusInternalServerError)
 		log.Println("Ошибка рендеринга:", err)

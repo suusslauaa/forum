@@ -35,7 +35,21 @@ func UserPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer db.Close()
+	var role string
+	role, err = GetUserRole(db, UserID)
+	if err != nil {
+		ErrorHandler(w, "Error fetching user role", http.StatusInternalServerError)
+		return
+	}
+	Moders := false
+	if role == "moder" || role == "admin" {
+		Moders = true
+	}
 
+	admin := false
+	if role == "admin" {
+		admin = true
+	}
 	// Получаем посты пользователя
 	posts, err := database.GetPostsByUserID(db, UserID)
 	if err != nil {
@@ -51,16 +65,13 @@ func UserPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Данные для шаблона
-	data := struct {
-		LoggedIn bool
-		ID       int
-		Username string
-		Posts    []database.Post
-	}{
-		LoggedIn: loggedIn,
-		ID:       UserID,
-		Username: username,
-		Posts:    posts,
+	data := map[string]interface{}{
+		"LoggedIn": loggedIn,
+		"ID":       UserID,
+		"Username": username,
+		"Posts":    posts,
+		"Moders":   Moders,
+		"Admin":    admin,
 	}
 
 	// Рендерим шаблон

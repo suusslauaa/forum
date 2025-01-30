@@ -35,7 +35,21 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		defer db.Close()
+		var role string
+		role, err = GetUserRole(db, loggedInUserID)
+		if err != nil {
+			ErrorHandler(w, "Error fetching user role", http.StatusInternalServerError)
+			return
+		}
+		Moders := false
+		if role == "moder" || role == "admin" {
+			Moders = true
+		}
 
+		admin := false
+		if role == "admin" {
+			admin = true
+		}
 		categories, err := database.GetCategories(db)
 		if err != nil {
 			ErrorHandler(w, "Error fetching categories", http.StatusInternalServerError)
@@ -48,17 +62,13 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 			ErrorHandler(w, "Template parsing error", http.StatusInternalServerError)
 			return
 		}
-
-		data := struct {
-			Username   string
-			UserID     int
-			Categories []database.Category
-			Check      string
-		}{
-			Username:   username,
-			UserID:     loggedInUserID, // Получите ID пользователя из сессии
-			Categories: categories,
-			Check:      checker,
+		data := map[string]interface{}{
+			"Username": username,
+			"Moders":   Moders,
+			"UserId":   loggedInUserID,
+			"Admin":    admin,
+			"Category": categories,
+			"Check":    checker,
 		}
 		if checker != "" {
 			checker = ""

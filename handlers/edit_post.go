@@ -18,7 +18,7 @@ func EditPostHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	}
 
-	_, loggedIn := store[sessionID.Value]
+	username, loggedIn := store[sessionID.Value]
 	if !loggedIn {
 		http.Redirect(w, r, "/login", http.StatusFound)
 	}
@@ -45,6 +45,21 @@ func EditPostHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		defer db.Close()
+		var role string
+		role, err = GetUserRole(db, loggedInUserID)
+		if err != nil {
+			ErrorHandler(w, "Error fetching user role", http.StatusInternalServerError)
+			return
+		}
+		Moders := false
+		if role == "moder" || role == "admin" {
+			Moders = true
+		}
+
+		admin := false
+		if role == "admin" {
+			admin = true
+		}
 
 		// Получаем пост из базы данных
 		post, err := database.GetPostByID(db, postID)
@@ -65,16 +80,14 @@ func EditPostHandler(w http.ResponseWriter, r *http.Request) {
 			ErrorHandler(w, "Template parsing error", http.StatusInternalServerError)
 			return
 		}
-		data := struct {
-			Post       database.Post
-			UserID     int
-			Categories []database.Category
-			Check      string
-		}{
-			UserID:     loggedInUserID, // Получите ID пользователя из сессии
-			Categories: categories,
-			Post:       post,
-			Check:      checker,
+		data := map[string]interface{}{
+			"Username": username,
+			"Moders":   Moders,
+			"UserId":   loggedInUserID,
+			"Admin":    admin,
+			"Category": categories,
+			"Check":    checker,
+			"post":     post,
 		}
 		if checker != "" {
 			checker = ""

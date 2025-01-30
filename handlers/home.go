@@ -9,10 +9,7 @@ import (
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
-	"golang.org/x/time/rate"
 )
-
-var limiter = rate.NewLimiter(1, 5)
 
 // Простейший in-memory store для сессий
 var store = map[string]string{}
@@ -31,14 +28,10 @@ var (
 
 // HomeHandler обрабатывает запросы на главную страницу
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
-	if !limiter.Allow() {
-		http.Error(w, "Too many requests", http.StatusTooManyRequests)
-		return
-	}
 	// Получаем сессию пользователя
 	sessionID, err := GetSessionID(w, r)
 	if err != nil {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
 
 	// Проверяем, авторизован ли пользователь
@@ -111,23 +104,14 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Создаем данные для шаблона, включая информацию о пользователе
-	data := struct {
-		LoggedIn   bool
-		ID         int
-		Username   string
-		Posts      []database.Post
-		Categories []database.Category
-		Moder      bool
-		Admin      bool
-	}{
-		LoggedIn:   loggedIn,
-		ID:         UserID,
-		Username:   username,
-		Posts:      posts,
-		Categories: categories,
-		Moder:      Moders,
-		Admin:      admin,
+	data := map[string]interface{}{
+		"LoggedIn":   loggedIn,
+		"ID":         UserID,
+		"Username":   username,
+		"Posts":      posts,
+		"Categories": categories,
+		"Moders":     Moders,
+		"Admin":      admin,
 	}
 
 	tmpl.Execute(w, data)

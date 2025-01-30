@@ -39,8 +39,23 @@ func NotificationsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer db.Close()
+	var role string
+	role, err = GetUserRole(db, userID)
+	if err != nil {
+		ErrorHandler(w, "Error fetching user role", http.StatusInternalServerError)
+		return
+	}
+	Moders := false
+	if role == "moder" || role == "admin" {
+		Moders = true
+	}
 
-	if r.Method == http.MethodPost && loggedIn {
+	admin := false
+	if role == "admin" {
+		admin = true
+	}
+
+	if r.Method == http.MethodPost {
 		// Получаем ID поста из параметров URL
 		postIDStr := r.URL.Query().Get("id")
 		if postIDStr == "" {
@@ -92,6 +107,8 @@ func NotificationsHandler(w http.ResponseWriter, r *http.Request) {
 	data := map[string]interface{}{
 		"Activities": activities,
 		"Username":   username,
+		"Moders":     Moders,
+		"Admin":      admin,
 	}
 
 	err = tmpl.Execute(w, data)

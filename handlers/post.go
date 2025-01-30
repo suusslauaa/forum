@@ -44,6 +44,10 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 	if role == "moderator" || role == "admin" {
 		Moders = true
 	}
+	admin := false
+	if role == "admin" {
+		admin = true
+	}
 	// Получаем ID поста из параметров URL
 	postIDStr := r.URL.Query().Get("id")
 	if postIDStr == "" {
@@ -97,29 +101,18 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 		ErrorHandler(w, "Template parsing error", http.StatusInternalServerError)
 		return
 	}
-
-	// Передаем данные в шаблон
-	datas := struct {
-		LoggedIn      bool
-		Creator       bool
-		Username      string
-		Post          database.Post
-		Comments      []database.Comment
-		SessionUserID int
-		Moder         bool
-		UserRole      string
-	}{
-		LoggedIn:      loggedIn,
-		Creator:       creator,
-		Username:      username,
-		Post:          post,
-		Comments:      comments,
-		SessionUserID: UserID,
-		Moder:         Moders,
-		UserRole:      role,
+	data := map[string]interface{}{
+		"LoggedIn":      loggedIn,
+		"Creator":       creator,
+		"Username":      username,
+		"Post":          post,
+		"Comments":      comments,
+		"SessionUserID": UserID,
+		"Moders":        Moders,
+		"Admin":         admin,
 	}
 
-	err = tmpl.Execute(w, datas)
+	err = tmpl.Execute(w, data)
 	if err != nil {
 		ErrorHandler(w, "Error rendering template", http.StatusInternalServerError)
 		return
