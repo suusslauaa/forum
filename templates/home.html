@@ -1,80 +1,78 @@
 <!DOCTYPE html>
-<link rel="stylesheet" href="../static/home.css">
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Post Page</title>
+    <title>Home Page</title>
+    <link rel="stylesheet" href="../static/home.css">
 </head>
 <body>
     <header>
-        {{if .LoggedIn}}
-        <nav class="nav">
-            <a href="/" class="auth-link">Home</a>
-            <a href="/my-posts" class="auth-link">My Posts</a>
-            <a href="/liked-posts" class="auth-link">Liked Posts</a>
-            {{if or .Moder .Admin}}
-            {{else}}
-            <a href="/gomoder" class="auth-link">Want Moder</a>
-            {{end}}
-            {{if .Admin}}
-            <a href="/reports" class="auth-link">Reports</a>
-            <a href="/requests" class="auth-link">Request</a>
-            <a href="/categories" class="auth-link">Category</a>
-            <a href="/users" class="auth-link">Users</a>
-            {{end}}
-        </nav>
-        <h1>SOSAL?</h1>
-        <div class="create-post">
-            <div class="nav2">
-                <a href="/create-post" class="auth-link">Create Post</a>
+        <div class="forum">
+            <a href="/">FORUM</a>
+        </div>
+        <nav class="heddy">
+            <div class="left">
+                {{if .LoggedIn}}
+                <a href="/my-posts">My Posts</a>
+                <a href="/liked-posts">Liked Posts</a>
+                {{if or .Moder .Admin}}
+                {{else}}
+                <a href="/gomoder">Want Moder</a>
+                {{end}}
+                {{if .Admin}}
+                <a href="/reports">Reports</a>
+                <a href="/requests">Request</a>
+                <a href="/categories">Category</a>
+                <a href="/users">Users</a>
+                {{end}}
+                {{end}}
             </div>
-            <div class="nav2">
-                <a href="/notifications" class="auth-link">Notifications</a>
-            </div>      
-            <div class="nav2">
-                <a href="/activity-page" class="auth-link">Activity Page</a>
-            </div>                                         
-            <div class="circle">{{.Username}}
-                <div class="dropdown">
-                    <a href="/logout" class="dropdown-link">Logout</a>
+            <div class="right">
+                {{if .LoggedIn}}
+                <a href="/create-post">Create Post</a>
+                <a href="/notifications">Notifications</a>
+                <a href="/activity-page">Activity Page</a>
+                <div class="user-menu">
+                    <div class="circle">
+                        {{.Username}}
+                        <div class="dropdown">
+                            <a href="/logout">Logout</a>
+                        </div>
+                    </div>
                 </div>
+                {{else}}
+                <a href="/register">Register</a>
+                <a href="/login">Login</a>
+                {{end}}
             </div>
-        </div>
-        {{else}}
-        <nav class="nav">
-            <a href="/" class="auth-link">Home</a>
         </nav>
-        <h1>SOSAL?</h1>
-        <div class="nav2">
-            <a href="/register" class="auth-link">Register</a>
-            <a href="/login" class="auth-link">Login</a>
-        </div>
-        {{end}}
     </header>
     <main>
-        <aside class="sidebar">
-            <p class="sidebar-title">Filter by categories</p>
-            <ul class="category-list">
-                <li><a href="/" class="category-item">All Categories</a></li>
+        <aside>
+            <h2>Filter by categories</h2>
+            <ul>
+                <li><a href="/">All Categories</a></li>
                 {{range .Categories}}
-                <li><a href="/?category_id={{.ID}}" class="category-item">{{.Name}}</a></li>
+                <li><a href="/?category_id={{.ID}}">{{.Name}}</a></li>
                 {{end}}
             </ul>
         </aside>
-        <section class="content">
+        <section>
             {{if .Posts}}
             {{range .Posts}}
             <a href="/post?id={{.ID}}" class="post-link">
-                <article class="post">
-                    <h2 class="post-title">{{.Title}}</h2>
-                    <p class="post-content">{{.Content}}</p>
-                    <span class="post-category">{{.Category}}</span>
+                <article>
+                    <h2>{{.Title}}</h2>
+                    <p>{{.Content}}</p>
+                    {{if .Category}}
+                    <span class="category-tag">{{.Category}}</span>
+                    {{end}}
                 </article>
             </a>
             {{end}}
             {{else}}
-            <p>There are no posts yet.</p>
+            <p class="no-posts">There are no posts yet.</p>
             {{end}}
         </section>
     </main>

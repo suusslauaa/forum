@@ -1,49 +1,49 @@
 <!DOCTYPE html>
-<link rel="stylesheet" href="../static/register.css">
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/register.css">
     <title>Registration Page</title>
 </head>
 <body>
-    <header>
-        <nav class="nav">
-            <a href="/" class="auth-link">Home</a>
-        </nav>
-        <h1>SOSAL?</h1>
-        <div class="nav2">
+<header>
+    <div class="forum">
+        <a href="/">FORUM</a>
+    </div>
+    <div class="heddy">
+        <div class="right">
             <a href="/login" class="auth-link">Login</a>
         </div>
-    </header>
-    <main>
-        <section class="registration-form">
-            <h1 class="form-title">Register an Account</h1>
-            <form action="/register" method="POST">
-                <div class="form-group">
-                    {{ if .Check }}
-                    <p id="check" style="color: red;">{{ .Check }}</p>
-                    {{ end }}
-                    <label for="username">Username</label>
-                    <input type="text" id="username" name="username" placeholder="Enter your username" required>
-                </div>
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" placeholder="Enter your email" required>
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
-                </div>
-                <button type="submit" class="submit-button">Register</button>
-            </form>
-        </section>
-        <div class="nav2">
-            <a href="/google/login" class="auth-link">google</a>
+    </div>
+</header>
+
+<main>
+    <section class="registration-form">
+        <h1 class="form-title">Register an Account</h1>
+        <form action="/register" method="POST">
+            <div class="form-group">
+                {{ if .Check }}
+                <p id="check" style="color: red;">{{ .Check }}</p>
+                {{ end }}
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Enter your username" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            </div>
+            <button type="submit" class="submit-button">Register</button>
+        </form>
+        <div class="social-auth">
+            <a href="/google/login" class="social-link">Sign up with Google</a>
+            <a href="/github/login" class="social-link">Sign up with GitHub</a>
         </div>
-        <div class="nav2">
-            <a href="/github/login" class="auth-link">github</a>
-        </div>
-    </main>
+    </section>
+</main>
 </body>
 </html>

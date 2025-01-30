@@ -80,13 +80,18 @@ func EditPostHandler(w http.ResponseWriter, r *http.Request) {
 			ErrorHandler(w, "Template parsing error", http.StatusInternalServerError)
 			return
 		}
+
 		data := map[string]interface{}{
-			"Username":   username,
-			"Moders":     Moders,
-			"UserID":     loggedInUserID,
-			"Admin":      admin,
-			"Categories": categories,
-			"Post":       post,
+			"Username": username,
+			"Moders":   Moders,
+			"UserId":   loggedInUserID,
+			"Admin":    admin,
+			"Category": categories,
+			"Check":    checker,
+			"Post":     post,
+		}
+		if checker != "" {
+			checker = ""
 		}
 		err = tmpl.Execute(w, data)
 		if err != nil {

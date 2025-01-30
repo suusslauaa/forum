@@ -1,61 +1,64 @@
 <!DOCTYPE html>
-<link rel="stylesheet" href="../static/notifications.css">
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Post Page</title>
+    <link rel="stylesheet" href="../static/notifications.css">
+    <title>Notifications</title>
 </head>
 <body>
     <header>
-        <nav class="nav">
-            <a href="/" class="auth-link">Home</a>
-            <a href="/my-posts" class="auth-link">My Posts</a>
-            <a href="/liked-posts" class="auth-link">Liked Posts</a>
-            {{if or .Moder .Admin}}
-            {{else}}
-            <a href="/gomoder" class="auth-link">Want Moder</a>
-            {{end}}
-            {{if .Admin}}
-            <a href="/reports" class="auth-link">Reports</a>
-            <a href="/requests" class="auth-link">Request</a>
-            <a href="/categories" class="auth-link">Category</a>
-            <a href="/users" class="auth-link">Users</a>
-            {{end}}
-        </nav>
-        <h1>SOSAL?</h1>
-        <div class="create-post">
-            <div class="nav2">
+        <div class="forum">
+            <a href="/">FORUM</a>
+        </div>
+        <div class="heddy">
+            <div class="left">
+                <a href="/my-posts" class="auth-link">My Posts</a>
+                <a href="/liked-posts" class="auth-link">Liked Posts</a>
+                {{if or .Moder .Admin}}
+                {{else}}
+                <a href="/gomoder" class="auth-link">Want Moder</a>
+                {{end}}
+                {{if .Admin}}
+                <a href="/reports" class="auth-link">Reports</a>
+                <a href="/requests" class="auth-link">Request</a>
+                <a href="/categories" class="auth-link">Category</a>
+                <a href="/users" class="auth-link">Users</a>
+                {{end}}
+            </div>
+            <div class="right">
                 <a href="/create-post" class="auth-link">Create Post</a>
-            </div>   
-            <div class="nav2">
                 <a href="/notifications" class="auth-link">Notifications</a>
-            </div>      
-            <div class="nav2">
                 <a href="/activity-page" class="auth-link">Activity Page</a>
-            </div>                                         
-            <div class="circle">{{.Username}}
-                <div class="dropdown">
-                    <a href="/logout" class="dropdown-link">Logout</a>
+                <div class="user-menu">
+                    <div class="circle">{{.Username}}
+                        <div class="dropdown">
+                            <a href="/logout" class="dropdown-link">Logout</a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </header>
+
     <main>
-        {{range .Activities}}
-        <div class="post-container">
+        <h1 class="page-title">Notifications</h1>
+        <section class="notifications-container">
+            {{range .Activities}}
             {{if .IsRead}}
-            <div class="post-title">{{.Type}}</div>
-            <div class="timestamp">Created At: {{.CreatedAt}}</div>
-            {{if .CommentContent}}
-            <p>Comment: {{.CommentContent}}</p>
+            <div class="notification-item">
+                <div class="notification-type">{{.Type}}</div>
+                <div class="timestamp">Created At: {{.CreatedAt}}</div>
+                {{if .CommentContent}}
+                <p class="comment-content">Comment: {{.CommentContent}}</p>
+                {{end}}
+                {{if .PostID}}
+                <a href="/post?id={{.PostID}}" class="post-link">View Post</a>
+                {{end}}
+            </div>
             {{end}}
-            {{if .PostID}}
-            <a href="/post?id={{.PostID}}" class="post-content">View Post</a>
             {{end}}
-            {{end}}
-        </div>
-        {{end}}
+        </section>
     </main>
 </body>
 </html>
