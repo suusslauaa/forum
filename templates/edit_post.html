@@ -16,8 +16,14 @@
         <h1>SOSAL?</h1>
         <div class="create-post">
             <div class="nav2">
-                <a href="/create-post" class="auth-link">Edit Post</a>
+                <a href="/create-post" class="auth-link">Create Post</a>
             </div>
+            <div class="nav2">
+                <a href="/notifications" class="auth-link">Notifications</a>
+            </div>      
+            <div class="nav2">
+                <a href="/activity-page" class="auth-link">Activity Page</a>
+            </div>         
             <div class="circle">{{.UserID}}
                 <div class="dropdown">
                     <a href="/logout" class="dropdown-link">Logout</a>
@@ -44,6 +50,12 @@
                     {{end}}
                 </select>
                 <label for="image" class="form-label">Upload Image:</label>
+                {{if .Post.ImagePath}}
+                <div>
+                    <label>Текущее изображение:</label>
+                    <img src="/{{.Post.ImagePath}}" alt="Current Image" style="max-width: 300px; max-height: 300px;">
+                </div>
+                {{end}}
                 <input type="file" id="image" name="image" class="form-input" accept="image/*">
                 <input type="hidden" name="user_id" value="{{.UserID}}">
                 <button type="submit" class="create-post-button">Save</button>

@@ -12,7 +12,10 @@ import (
 	"github.com/gofrs/uuid" // Используем новый пакет для UUID
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
+	"golang.org/x/time/rate"
 )
+
+var limiter = rate.NewLimiter(1, 5)
 
 // Простейший in-memory store для сессий
 var store = map[string]string{}
@@ -238,6 +241,10 @@ func GitHubCallback(w http.ResponseWriter, r *http.Request) {
 
 // HomeHandler обрабатывает запросы на главную страницу
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
+	if !limiter.Allow() {
+		http.Error(w, "Too many requests", http.StatusTooManyRequests)
+		return
+	}
 	// Получаем сессию пользователя
 	sessionID, err := r.Cookie("session_id")
 	if err != nil {

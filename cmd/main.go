@@ -53,6 +53,10 @@ func main() {
 	http.HandleFunc("/github/login", handlers.GitHubLogin)
 	http.HandleFunc("/github/callback", handlers.GitHubCallback)
 	http.HandleFunc("/activity-page", handlers.GetUserActivity)
+	http.HandleFunc("/reports", handlers.ReportsHandler)
+	http.HandleFunc("/categories", handlers.CategoryHandler)
+	http.HandleFunc("/users", handlers.UserListHandler)
+
 	// Запуск сервера
 	log.Println("Сервер запущен на http://localhost:4000")
 	log.Fatal(http.ListenAndServe(":4000", nil))

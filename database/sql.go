@@ -55,7 +55,6 @@ func createTables(db *sql.DB) error {
 			liked INTEGER DEFAULT 0, -- Начальное значение лайков 0
 			disliked INTEGER DEFAULT 0, -- Начальное значение лайков 0
 			image_path TEXT, -- Добавляем поле для хранения пути к изображению
-			status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'approved', 'rejected')), -- Добавляем статус поста для модерации
 			FOREIGN KEY (category_id) REFERENCES categories(id),
 			FOREIGN KEY (author_id) REFERENCES users(id)
 		);`,
@@ -105,12 +104,9 @@ func createTables(db *sql.DB) error {
 		`CREATE TABLE IF NOT EXISTS reports (
 			id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 			post_id INTEGER,
-			comment_id INTEGER,
 			reported_by INTEGER NOT NULL,
-			reason TEXT NOT NULL,
-			status TEXT DEFAULT 'open' CHECK(status IN ('open', 'resolved')),
+			status TEXT DEFAULT 'none' CHECK(status IN ('none','open', 'resolved')),
 			FOREIGN KEY (post_id) REFERENCES posts(id),
-			FOREIGN KEY (comment_id) REFERENCES comments(id),
 			FOREIGN KEY (reported_by) REFERENCES users(id)
 		);`,
 		`CREATE TABLE IF NOT EXISTS activities (

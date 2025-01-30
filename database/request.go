@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"time"
 )
 
@@ -42,12 +43,75 @@ func GetPendingPromotionRequests(db *sql.DB) ([]PromotionRequest, error) {
 
 // ApprovePromotionRequest обновляет статус заявки на 'approved'
 func ApprovePromotionRequest(db *sql.DB, requestID int) error {
-	_, err := db.Exec(`UPDATE promotion_requests SET status = 'approved' WHERE id = ?`, requestID)
-	return err
+	// Получаем user_id из таблицы promotion_requests
+	var userID int
+	err := db.QueryRow(`SELECT user_id FROM promotion_requests WHERE id = ?`, requestID).Scan(&userID)
+	if err != nil {
+		return fmt.Errorf("не удалось получить user_id: %v", err)
+	}
+
+	// Обновляем статус заявки на 'approved'
+	_, err = db.Exec(`UPDATE promotion_requests SET status = 'approved' WHERE id = ?`, requestID)
+	if err != nil {
+		return fmt.Errorf("ошибка при обновлении статуса заявки: %v", err)
+	}
+
+	// Меняем роль пользователя (например, на 'moderator')
+	newRole := "moderator"
+	_, err = db.Exec(`UPDATE users SET role = ? WHERE id = ?`, newRole, userID)
+	if err != nil {
+		return fmt.Errorf("ошибка при обновлении роли пользователя: %v", err)
+	}
+
+	log.Printf("Заявка %d одобрена, роль пользователя %d изменена на %s", requestID, userID, newRole)
+	return nil
 }
 
 // DenyPromotionRequest обновляет статус заявки на 'denied'
 func DenyPromotionRequest(db *sql.DB, requestID int) error {
 	_, err := db.Exec(`UPDATE promotion_requests SET status = 'denied' WHERE id = ?`, requestID)
 	return err
+}
+
+func ReportPost(db *sql.DB, postID, userID int) error {
+	// Проверяем, есть ли уже репорт от этого пользователя на этот пост
+	var existingStatus string
+	err := db.QueryRow("SELECT status FROM reports WHERE post_id = ? AND reported_by = ?", postID, userID).Scan(&existingStatus)
+
+	if err == sql.ErrNoRows {
+		// Если репорта нет, создаем новый со статусом "open"
+		_, err = db.Exec("INSERT INTO reports (post_id, reported_by, status) VALUES (?, ?, 'open')", postID, userID)
+		if err != nil {
+			return err
+		}
+	} else if err == nil {
+		// Если репорт уже есть, обновляем статус на "open"
+		_, err = db.Exec("UPDATE reports SET status = 'open' WHERE post_id = ? AND reported_by = ?", postID, userID)
+		if err != nil {
+			return err
+		}
+	} else {
+		return err
+	}
+
+	return nil
+}
+
+func DeletePostReport(db *sql.DB, postID int) error {
+	// Проверяем, есть ли уже репорт от этого пользователя на этот пост
+	var existingStatus string
+	err := db.QueryRow("SELECT status FROM reports WHERE post_id = ?", postID).Scan(&existingStatus)
+
+	if err == sql.ErrNoRows {
+	} else if err == nil {
+		// Если репорт уже есть, обновляем статус на "open"
+		_, err = db.Exec("UPDATE reports SET status = 'none' WHERE post_id = ? ", postID)
+		if err != nil {
+			return err
+		}
+	} else {
+		return err
+	}
+
+	return nil
 }

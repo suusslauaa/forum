@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Manage Categories</title>
+</head>
+<body>
+<h1>Categories</h1>
+
+<h2>Add Category</h2>
+<form method="post" action="/categories?action=create">
+  <input type="text" name="name" placeholder="Category name" required>
+  <button type="submit">Add</button>
+</form>
+
+<h2>Existing Categories</h2>
+<ul>
+  {{range .}}
+  <li>
+    {{.Name}}
+    <form method="post" action="/categories?action=edit&id={{.ID}}" style="display:inline;">
+      <input type="text" name="name" placeholder="New name" required>
+      <button type="submit">Edit</button>
+    </form>
+    <form method="post" action="/categories?action=delete&id={{.ID}}" style="display:inline;">
+      <button type="submit">Delete</button>
+    </form>
+  </li>
+  {{end}}
+</ul>
+</body>
+</html>

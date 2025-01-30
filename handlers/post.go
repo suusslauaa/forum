@@ -24,7 +24,28 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Получаем ID пользователя по имени
 	UserID, _ := id[sessionID.Value]
+	var role string
+	if loggedIn {
+		UserID = id[sessionID.Value]
 
+		// Получаем роль пользователя
+		db, err := database.InitDB()
+		if err != nil {
+			ErrorHandler(w, "Database connection error", http.StatusInternalServerError)
+			return
+		}
+		defer db.Close()
+
+		role, err = GetUserRole(db, UserID)
+		if err != nil {
+			ErrorHandler(w, "Error fetching user role", http.StatusInternalServerError)
+			return
+		}
+	}
+	Moders := false
+	if role == "moderator" || role == "admin" {
+		Moders = true
+	}
 	// Получаем ID поста из параметров URL
 	postIDStr := r.URL.Query().Get("id")
 	if postIDStr == "" {
@@ -62,7 +83,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 	// Обрабатываем POST-запрос для добавления комментария
 	if r.Method == http.MethodPost && loggedIn {
 
-		if err := handlePostActions(w, r, db, postID, creator, UserID); err != nil {
+		if err := handlePostActions(w, r, db, postID, UserID, Moders); err != nil {
 			ErrorHandler(w, "Error handling post action", http.StatusInternalServerError)
 			return
 		}
@@ -87,6 +108,8 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 		Post          database.Post
 		Comments      []database.Comment
 		SessionUserID int
+		Moder         bool
+		UserRole      string
 	}{
 		LoggedIn:      loggedIn,
 		Creator:       creator,
@@ -94,6 +117,8 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 		Post:          post,
 		Comments:      comments,
 		SessionUserID: UserID,
+		Moder:         Moders,
+		UserRole:      role,
 	}
 
 	err = tmpl.Execute(w, datas)
@@ -117,7 +142,7 @@ func getSessionID(w http.ResponseWriter, r *http.Request) (*http.Cookie, error) 
 }
 
 // Обрабатываем лайки, дизлайки и удаление
-func handlePostActions(w http.ResponseWriter, r *http.Request, db *sql.DB, postID int, creator bool, userID int) error {
+func handlePostActions(w http.ResponseWriter, r *http.Request, db *sql.DB, postID int, userID int, moders bool) error {
 	action := r.URL.Query().Get("action")
 	switch action {
 	case "like":
@@ -131,15 +156,12 @@ func handlePostActions(w http.ResponseWriter, r *http.Request, db *sql.DB, postI
 			return err
 		}
 	case "delete":
-		if !creator {
-			ErrorHandler(w, "You are not the creator of this post", http.StatusForbidden)
-			return nil
-		}
 		if err := database.DeletePost(db, postID); err != nil {
 			ErrorHandler(w, "Error deleting post", http.StatusInternalServerError)
 			return err
 		}
-		http.Redirect(w, r, "/my-posts", http.StatusSeeOther)
+		database.DeletePostReport(db, postID)
+		http.Redirect(w, r, "/home", http.StatusSeeOther)
 	case "comment":
 		commentText := r.FormValue("content")
 		if commentText == "" {
@@ -149,6 +171,17 @@ func handlePostActions(w http.ResponseWriter, r *http.Request, db *sql.DB, postI
 		if err := database.AddComment(db, postID, userID, commentText); err != nil {
 			ErrorHandler(w, "Error adding comment", http.StatusInternalServerError)
 			return err
+		}
+	case "report":
+		if !moders {
+			ErrorHandler(w, "Error reporting post", http.StatusInternalServerError)
+			return nil
+		}
+		err := database.ReportPost(db, postID, userID)
+		if err != nil {
+			ErrorHandler(w, "Database error", http.StatusInternalServerError)
+			log.Println("Error updating report:", err)
+			return nil
 		}
 	default:
 		ErrorHandler(w, "Invalid action", http.StatusBadRequest)
@@ -362,9 +395,9 @@ func ToggleLikeComment(db *sql.DB, commentID, userID int) error {
 	}
 }
 
-func DeleteComment(db *sql.DB, commentID int, userID int) error {
-	query := `DELETE FROM comments WHERE id = ? AND user_id = ?`
-	_, err := db.Exec(query, commentID, userID)
+func DeleteComment(db *sql.DB, commentID int) error {
+	query := `DELETE FROM comments WHERE id = ?`
+	_, err := db.Exec(query, commentID)
 	return err
 }
 
@@ -389,7 +422,7 @@ func handleCommentActions(w http.ResponseWriter, r *http.Request, db *sql.DB, co
 			return err
 		}
 	case "delete":
-		if err := DeleteComment(db, commentID, userID); err != nil {
+		if err := DeleteComment(db, commentID); err != nil {
 			ErrorHandler(w, "Error deleting comment", http.StatusInternalServerError)
 			return err
 		}

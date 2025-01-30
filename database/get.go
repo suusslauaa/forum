@@ -29,6 +29,7 @@ type Post struct {
 	DislikeCount int
 	ImagePath    string
 	Comments     []Comment // Добавляем список комментариев
+	CreatedAt    string
 }
 
 func GetPostByID(db *sql.DB, postID int) (Post, error) {

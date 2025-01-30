@@ -15,7 +15,6 @@
         <a href="/liked-posts" class="auth-link">Liked Posts</a>
         <a href="/gomoder" class="auth-link">Want Moder</a>
     </nav>
-    <h1>SOSAL?</h1>
     <div class="create-post">
         <a href="/create-post" class="auth-link">Create Post</a>
         <a href="/notifications" class="auth-link">Notifications</a>
@@ -41,7 +40,7 @@
         <h1 class="post-title">{{.Post.Title}}</h1>
         <p class="post-content">{{.Post.Content}}</p>
         {{if .Post.ImagePath}}
-        <img src="/{{.Post.ImagePath}}" alt="Post Image" class="post-image">
+        <img src="/{{.Post.ImagePath}}" alt="Post Image" class="post-image" style="max-width: 300px; max-height: 300px;">
         {{end}}      
         <p class="post-meta">Category: <span class="post-category">{{.Post.Category}}</span></p>
         <p class="post-meta">Posted by: <span class="post-author">{{.Post.Author}}</span></p>
@@ -56,20 +55,29 @@
                     <button type="submit" class="dislike-button">Dislike ({{.Post.DislikeCount}})</button>
                 </form>
             </div>
-            {{if .Creator}}
+            {{if or .Creator .Moder}}
             <div class="actions-right">
-                <a href="/edit-post?id={{.Post.ID}}" class="edit-button">Edit</a>
+                <button type="submit" class="delete-button">
+                    <a href="/edit-post?id={{.Post.ID}}" class="xxx">Edit</a>
+                </button>
                 <form method="post" action="/post?action=delete&id={{.Post.ID}}">
                     <button type="submit" class="delete-button">Delete</button>
                 </form>
+                {{if .Moder}}
+                <div class="actions-right">
+                    <form method="post" action="/post?action=report&id={{.Post.ID}}">
+                        <button type="submit" class="delete-button">Report</button>
+                    </form>
+                </div>
+                {{end}}
             </div>
             {{end}}
         </div>
         {{else}}
         <div class="post-actions">
             <div class="actions-left">
-                <p type="submit" class="like-button">Like ({{.Post.LikeCount}})</button>
-                <p type="submit" class="dislike-button">Dislike ({{.Post.DislikeCount}})</button>
+                <button type="submit" class="like-button">Like ({{.Post.LikeCount}})</button>
+                <button type="submit" class="dislike-button">Dislike ({{.Post.DislikeCount}})</button>
             </div>
         </div>
         {{end}}
@@ -85,20 +93,23 @@
                 <p>{{ .Author }}: {{ .Content }}</p>
                 {{if $.LoggedIn}}
                 <form method="post" action="/comment?id={{.ID}}&action=like">
-                    <button type="submit">👍 Like</button>
-                </form> ({{ .LikeCount }})
+                    <button type="submit">Like ({{ .LikeCount }})</button>
+                </form> 
                 <form method="post" action="/comment?id={{.ID}}&action=dislike">
-                    <button type="submit">👎 Dislike</button>
-                </form> ({{ .DislikeCount }}) 
+                    <button type="submit">Dislike ({{ .DislikeCount }})</button>
+                </form>  
                 {{if eq .UserID $.SessionUserID}}
                 <form method="post" action="/comment?id={{.ID}}&action=update">
                     <input type="text" name="content" value="{{ .Content }}">
                     <button type="submit">Update</button>
                 </form>
+                {{end}}
+                {{if or (eq .UserID $.SessionUserID) (eq $.UserRole "moderator") (eq $.UserRole "admin")}}
                 <form method="post" action="/comment?id={{.ID}}&action=delete">
                     <button type="submit">Delete</button>
                 </form>
                 {{end}}
+
                 {{else}}
                 <p>👍 Like</a> ({{ .LikeCount }})
                 <p>👎 Dislike</a> ({{ .DislikeCount }}) 
