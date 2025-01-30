@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"strconv"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -30,10 +31,10 @@ func CreateCategory(db *sql.DB, name string) error {
 	return err
 }
 
-func EditPost(db *sql.DB, title, content string, categoryID int, createdAt string, id int) error {
+func EditPost(db *sql.DB, title, content string, categoryID int, createdAt string, id int, savePath string) error {
 	query := `
 		UPDATE posts 
-		SET title = ?, content = ?, category_id = ?, created_at = ?
+		SET title = ?, content = ?, category_id = ?, created_at = ?, image_path = ?
 		WHERE id = ?;
 	`
 
@@ -46,7 +47,7 @@ func EditPost(db *sql.DB, title, content string, categoryID int, createdAt strin
 	defer stmt.Close()
 
 	// Выполняем запрос с передачей ID записи
-	_, err = stmt.Exec(title, content, categoryID, createdAt, id)
+	_, err = stmt.Exec(title, content, categoryID, createdAt, savePath, id)
 	if err != nil {
 		fmt.Println("Ошибка выполнения запроса:", err)
 	}
@@ -141,8 +142,19 @@ func ToggleLike(db *sql.DB, postID, userID int) error {
 		// Увеличиваем счетчик лайков
 		_, err = db.Exec("UPDATE posts SET liked = liked + 1 WHERE id = ?", postID)
 		query := `INSERT INTO activities (user_id, activity_type, post_id, created_at) 
-		VALUES ($1, 'like_post', $2, CURRENT_TIMESTAMP)`
+		VALUES ($1, 'You liked', $2, CURRENT_TIMESTAMP)`
 		_, err = db.Exec(query, userID, postID)
+
+		post, _ := GetPostByID(db, postID)
+		if userID != post.AuthorID {
+			query = `
+			INSERT INTO notifications (user_id, notification_type, post_id, created_at) 
+			VALUES ($1, 'You received a like', $2, CURRENT_TIMESTAMP)
+			`
+			post, _ := GetPostByID(db, postID)
+			_, err = db.Exec(query, post.AuthorID, postID)
+		}
+
 		return err
 	} else if err != nil {
 		return err
@@ -166,8 +178,15 @@ func ToggleLike(db *sql.DB, postID, userID int) error {
 		// Обновляем счетчики
 		_, err = db.Exec("UPDATE posts SET liked = liked + 1, disliked = disliked - 1 WHERE id = ?", postID)
 		query := `INSERT INTO activities (user_id, activity_type, post_id, created_at) 
-		VALUES ($1, 'like_post', $2, CURRENT_TIMESTAMP)`
+		VALUES ($1, 'You liked', $2, CURRENT_TIMESTAMP)`
 		_, err = db.Exec(query, userID, postID)
+		post, _ := GetPostByID(db, postID)
+		if userID != post.AuthorID {
+			query = `INSERT INTO notifications (user_id, notification_type, post_id, created_at) 
+		VALUES ($1, 'You received a like', $2, CURRENT_TIMESTAMP)`
+			post, _ := GetPostByID(db, postID)
+			_, err = db.Exec(query, post.AuthorID, postID)
+		}
 		return err
 	}
 }
@@ -186,8 +205,15 @@ func ToggleDislike(db *sql.DB, postID, userID int) error {
 		// Увеличиваем счетчик лайков
 		_, err = db.Exec("UPDATE posts SET disliked = disliked + 1 WHERE id = ?", postID)
 		query := `INSERT INTO activities (user_id, activity_type, post_id, created_at) 
-		VALUES ($1, 'dislike_post', $2, CURRENT_TIMESTAMP)`
+		VALUES ($1, 'You disliked', $2, CURRENT_TIMESTAMP)`
 		_, err = db.Exec(query, userID, postID)
+		post, _ := GetPostByID(db, postID)
+		if userID != post.AuthorID {
+			query = `INSERT INTO notifications (user_id, notification_type, post_id, created_at) 
+		VALUES ($1, 'You received a dislike', $2, CURRENT_TIMESTAMP)`
+			post, _ := GetPostByID(db, postID)
+			_, err = db.Exec(query, post.AuthorID, postID)
+		}
 		return err
 	} else if err != nil {
 		return err
@@ -211,8 +237,16 @@ func ToggleDislike(db *sql.DB, postID, userID int) error {
 		// Обновляем счетчики
 		_, err = db.Exec("UPDATE posts SET disliked = disliked + 1, liked = liked - 1 WHERE id = ?", postID)
 		query := `INSERT INTO activities (user_id, activity_type, post_id, created_at) 
-		VALUES ($1, 'dislike_post', $2, CURRENT_TIMESTAMP)`
+		VALUES ($1, 'You disliked', $2, CURRENT_TIMESTAMP)`
 		_, err = db.Exec(query, userID, postID)
+		post, _ := GetPostByID(db, postID)
+		if userID != post.AuthorID {
+			query = `INSERT INTO notifications (user_id, notification_type, post_id, created_at) 
+		VALUES ($1, 'You received a dislike', $2, CURRENT_TIMESTAMP)`
+			post, _ := GetPostByID(db, postID)
+			_, err = db.Exec(query, post.AuthorID, postID)
+		}
+		
 		return err
 	}
 }
@@ -243,9 +277,19 @@ func AddComment(db *sql.DB, postID, userID int, content string) error {
 	if err != nil {
 		return err
 	}
-	query = `INSERT INTO activities (user_id, activity_type, comment_id, post_id, created_at) 
-	           VALUES ($1, 'create_comment', $2, $3, CURRENT_TIMESTAMP)`
-	_, err = db.Exec(query, userID, commentID, postID)
+
+	query = `INSERT INTO activities (user_id, activity_type, comment_id, comment_content, post_id, created_at) 
+	           VALUES ($1, 'You commented', $2, $3, $4, CURRENT_TIMESTAMP)`
+	_, err = db.Exec(query, userID, commentID, content, postID)
+	com, _ := strconv.Atoi(commentID)
+	comAuth, _ := GetUserIDByCommentID(db, com)
+	post, _ := GetPostByID(db, postID)
+	if comAuth != post.AuthorID {
+		query = `INSERT INTO notifications (user_id, notification_type, post_id, comment_content, created_at) 
+	VALUES ($1, 'You received a comment', $2, $3, CURRENT_TIMESTAMP)`
+
+		_, err = db.Exec(query, post.AuthorID, content, postID)
+	}
 	return err
 }
 

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="../static/home.css">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post Page</title>
+</head>
+<body>
+    <header>
+        <nav class="nav">
+            <a href="/" class="auth-link">Home</a>
+            <a href="/my-posts" class="auth-link">My Posts</a>
+            <a href="/liked-posts" class="auth-link">Liked Posts</a>
+            <a href="/gomoder" class="auth-link">Want Moder</a>
+            {{if .Moder}}
+            <a href="/posts/unapproved" class="auth-link">Un Approved</a>
+            {{end}}
+            {{if .Admin}}
+            <a href="/requests" class="auth-link">request</a>
+            {{end}}
+        </nav>
+        <h1>SOSAL?</h1>
+        <div class="create-post">
+            <div class="nav2">
+                <a href="/create-post" class="auth-link">Create Post</a>
+            </div>   
+            <div class="nav2">
+                <a href="/activity-page" class="auth-link">Activity Page</a>
+            </div>                                         
+            <div class="circle">{{.Username}}
+                <div class="dropdown">
+                    <a href="/logout" class="dropdown-link">Logout</a>
+                </div>
+            </div>
+        </div>
+    </header>
+    <main>
+        {{range .Activities}}
+        <div class="post-container">
+            <div class="post-title">{{.Type}}</div>
+            <div class="timestamp">Created At: {{.CreatedAt}}</div>
+            {{if .CommentContent}}
+            <p>Comment: {{.CommentContent}}</p>
+            {{end}}
+            {{if .PostID}}
+            <a href="/post?id={{.PostID}}" class="post-content">View Post</a>
+            {{end}}
+        </div>
+        {{end}}
+    </main>
+</body>
+</html>

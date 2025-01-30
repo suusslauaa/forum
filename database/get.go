@@ -249,3 +249,26 @@ func GetPostIDByCommentID(db *sql.DB, commentID int) (postID int, err error) {
 
 	return
 }
+
+func GetUserIDByCommentID(db *sql.DB, commentID int) (userID int, err error) {
+	query := `
+	SELECT 
+		c.user_id
+	FROM comments c
+	WHERE c.id = ?`
+
+	// Выполняем запрос
+	row := db.QueryRow(query, commentID)
+
+	// Проверяем ошибку при сканировании
+	err = row.Scan(&userID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return userID, errors.New("post not found")
+		}
+		log.Printf("Error scanning row: %v", err)
+		return userID, err
+	}
+
+	return
+}

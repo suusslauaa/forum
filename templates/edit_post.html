@@ -13,6 +13,7 @@
             <a href="#" class="auth-link">My Posts</a>
             <a href="#" class="auth-link">Liked Posts</a>
         </nav>
+        <h1>SOSAL?</h1>
         <div class="create-post">
             <div class="nav2">
                 <a href="/create-post" class="auth-link">Edit Post</a>
@@ -30,7 +31,7 @@
             {{ if .Check }}
             <p id="check" style="color: red;">{{ .Check }}</p>
             {{ end }}
-            <form action="/edit-post?id={{.Post.ID}}" method="POST" class="create-post-form">
+            <form action="/edit-post?id={{.Post.ID}}" method="POST" class="create-post-form" enctype="multipart/form-data">
                 <label for="title" class="form-label">Post Title:</label>
                 <input type="text" id="title" name="title" class="form-input" value="{{.Post.Title}}" required>
                 <label for="content" class="form-label">Post Content:</label>
@@ -42,6 +43,8 @@
                     <option value="{{.ID}}">{{.Name}}</option>
                     {{end}}
                 </select>
+                <label for="image" class="form-label">Upload Image:</label>
+                <input type="file" id="image" name="image" class="form-input" accept="image/*">
                 <input type="hidden" name="user_id" value="{{.UserID}}">
                 <button type="submit" class="create-post-button">Save</button>
             </form>

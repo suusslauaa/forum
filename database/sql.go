@@ -119,10 +119,23 @@ func createTables(db *sql.DB) error {
 			activity_type VARCHAR(20) NOT NULL, -- Тип активности ('post', 'like', 'dislike', 'comment')
 			post_id INTEGER,                        -- ID поста, если применимо
 			comment_id INTEGER,                     -- ID комментария, если применимо
+			comment_content TEXT DEFAULT NULL, 
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
 			FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE SET NULL,
 			FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE SET NULL
+		);`,
+		`CREATE TABLE IF NOT EXISTS notifications (
+			id INTEGER PRIMARY KEY,
+			user_id INTEGER,
+			notification_type TEXT NOT NULL, 						-- Тип активности ('like', 'dislike', 'comment')
+			post_id INTEGER,    
+			comment_id INTEGER,                      				-- ID поста, если применимо
+			comment_content TEXT DEFAULT NULL,                      -- ID комментария, если применимо
+			is_read BOOLEAN DEFAULT FALSE,
+			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+			FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE SET NULL
 		);`,
 	}
 

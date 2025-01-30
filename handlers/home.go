@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"forum/database"
 	"html/template"
 	"log"
@@ -275,7 +274,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	if role == "moder" || role == "admin" {
 		Moders = true
 	}
-	fmt.Println(role)
+
 	admin := false
 	if role == "admin" {
 		admin = true

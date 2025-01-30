@@ -472,7 +472,7 @@ func GetUserActivity(w http.ResponseWriter, r *http.Request) {
 	userID, _ := id[sessionID.Value]
 
 	query := `
-	SELECT a.activity_type, a.created_at, p.id AS post_id, c.id AS comment_id
+	SELECT a.activity_type, a.created_at, p.id AS post_id, c.content AS comment_content
 	FROM activities a
 	LEFT JOIN posts p ON a.post_id = p.id
 	LEFT JOIN comments c ON a.comment_id = c.id
@@ -498,7 +498,7 @@ func GetUserActivity(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var activity Activity
 		// Сканируем в указатели для корректной работы с NULL
-		if err := rows.Scan(&activity.Type, &activity.CreatedAt, &activity.PostID, &activity.CommentID); err != nil {
+		if err := rows.Scan(&activity.Type, &activity.CreatedAt, &activity.PostID, &activity.CommentContent); err != nil {
 			log.Println(err)
 			continue
 		}
@@ -525,10 +525,10 @@ func GetUserActivity(w http.ResponseWriter, r *http.Request) {
 }
 
 type Activity struct {
-	ID        int
-	AuthorID  int
-	Type      string
-	PostID    *int
-	CommentID *int
-	CreatedAt string
+	ID             int
+	AuthorID       int
+	Type           string
+	PostID         *int
+	CommentContent *string
+	CreatedAt      string
 }
