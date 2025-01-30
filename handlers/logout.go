@@ -7,10 +7,9 @@ import (
 // LogoutHandler обрабатывает выход пользователя
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	// Получаем session_id из cookies
-	sessionID, err := r.Cookie("session_id")
+	sessionID, err := GetSessionID(w, r)
 	if err != nil {
-		ErrorHandler(w, "Ошибка сессии", http.StatusInternalServerError)
-		return
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	}
 
 	// Удаляем сессию

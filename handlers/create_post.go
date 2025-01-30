@@ -14,10 +14,9 @@ import (
 
 // CreatePostHandler обрабатывает создание нового поста
 func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
-	sessionID, err := r.Cookie("session_id")
+	sessionID, err := GetSessionID(w, r)
 	if err != nil {
-		http.Redirect(w, r, "/login", http.StatusFound)
-		return
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	}
 
 	username, loggedIn := store[sessionID.Value]

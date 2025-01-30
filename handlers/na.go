@@ -11,10 +11,9 @@ import (
 )
 
 func NotificationsHandler(w http.ResponseWriter, r *http.Request) {
-	sessionID, err := r.Cookie("session_id")
+	sessionID, err := GetSessionID(w, r)
 	if err != nil {
-		http.Redirect(w, r, "/login", http.StatusFound)
-		return
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	}
 
 	username, loggedIn := store[sessionID.Value]
@@ -126,12 +125,10 @@ func handleNotificationActions(w http.ResponseWriter, r *http.Request, db *sql.D
 }
 
 func ReadNotificationsHandler(w http.ResponseWriter, r *http.Request) {
-	sessionID, err := r.Cookie("session_id")
+	sessionID, err := GetSessionID(w, r)
 	if err != nil {
-		http.Redirect(w, r, "/login", http.StatusFound)
-		return
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	}
-
 	username, loggedIn := store[sessionID.Value]
 	if !loggedIn {
 		http.Redirect(w, r, "/login", http.StatusFound)

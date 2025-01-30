@@ -33,6 +33,11 @@ type Post struct {
 	CreatedAt    string
 }
 
+type Category struct {
+	ID   int
+	Name string
+}
+
 func GetPostByID(db *sql.DB, postID int) (Post, error) {
 	var post Post
 	// Получаем пост
@@ -227,11 +232,6 @@ func GetCategories(db *sql.DB) ([]Category, error) {
 	}
 
 	return categories, nil
-}
-
-type Category struct {
-	ID   int
-	Name string
 }
 
 func GetPostIDByCommentID(db *sql.DB, commentID int) (postID int, err error) {

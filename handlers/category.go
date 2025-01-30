@@ -10,10 +10,9 @@ import (
 
 func CategoryHandler(w http.ResponseWriter, r *http.Request) {
 	// Проверяем сессию пользователя
-	sessionID, err := r.Cookie("session_id")
+	sessionID, err := GetSessionID(w, r)
 	if err != nil {
-		http.Redirect(w, r, "/login", http.StatusFound)
-		return
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	}
 
 	_, loggedIn := store[sessionID.Value]

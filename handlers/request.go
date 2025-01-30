@@ -11,10 +11,9 @@ import (
 
 func ShowPromotionFormHandler(w http.ResponseWriter, r *http.Request) {
 	// Проверяем, что пользователь авторизован
-	sessionID, err := r.Cookie("session_id")
+	sessionID, err := GetSessionID(w, r)
 	if err != nil {
-		http.Redirect(w, r, "/login", http.StatusFound)
-		return
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	}
 
 	// Получаем данные из сессии

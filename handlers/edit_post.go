@@ -13,9 +13,9 @@ import (
 )
 
 func EditPostHandler(w http.ResponseWriter, r *http.Request) {
-	sessionID, err := r.Cookie("session_id")
+	sessionID, err := GetSessionID(w, r)
 	if err != nil {
-		http.Redirect(w, r, "/login", http.StatusFound)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	}
 
 	_, loggedIn := store[sessionID.Value]

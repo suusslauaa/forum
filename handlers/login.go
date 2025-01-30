@@ -78,8 +78,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
-
 		// Успешная аутентификация
+
 		sessionIDCookie, err := r.Cookie("session_id")
 		var sessionID string
 		if err != nil {
