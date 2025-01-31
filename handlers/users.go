@@ -20,7 +20,7 @@ func UserListHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	}
-	_, loggedIn := store[sessionID.Value]
+	username, loggedIn := store[sessionID.Value]
 	UserID := id[sessionID.Value]
 	if !loggedIn {
 		http.Redirect(w, r, "/login", http.StatusFound)
@@ -97,12 +97,9 @@ func UserListHandler(w http.ResponseWriter, r *http.Request) {
 		ErrorHandler(w, "Template parsing error", http.StatusInternalServerError)
 		return
 	}
-	Moders := true
-	admin := true
 	data := map[string]interface{}{
-		"Users": users,
-		"Moder": Moders,
-		"Admin": admin,
+		"Username": username,
+		"Users":    users,
 	}
 	// Отправляем данные в шаблон
 	err = tmpl.Execute(w, data)

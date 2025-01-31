@@ -95,6 +95,15 @@ func NotificationsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		activities = append(activities, activity)
 	}
+	status, err := database.GetPromotionStatus(db, userID)
+	if err != nil {
+		ErrorHandler(w, "Error fetching promotion status", http.StatusInternalServerError)
+		return
+	}
+	stat := true
+	if status == "pending" {
+		stat = false
+	}
 
 	tmpl, err := template.ParseFiles("templates/notifications.html")
 	if err != nil {
@@ -109,6 +118,7 @@ func NotificationsHandler(w http.ResponseWriter, r *http.Request) {
 		"Username":   username,
 		"Moder":      Moders,
 		"Admin":      admin,
+		"Stat":       stat,
 	}
 
 	err = tmpl.Execute(w, data)
@@ -169,6 +179,21 @@ func ReadNotificationsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer db.Close()
+	var role string
+	role, err = GetUserRole(db, userID)
+	if err != nil {
+		ErrorHandler(w, "Error fetching user role", http.StatusInternalServerError)
+		return
+	}
+	Moders := false
+	if role == "moder" || role == "admin" {
+		Moders = true
+	}
+
+	admin := false
+	if role == "admin" {
+		admin = true
+	}
 
 	rows, err := db.Query(query, userID)
 	if err != nil {
@@ -187,6 +212,15 @@ func ReadNotificationsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		activities = append(activities, activity)
 	}
+	status, err := database.GetPromotionStatus(db, userID)
+	if err != nil {
+		ErrorHandler(w, "Error fetching promotion status", http.StatusInternalServerError)
+		return
+	}
+	stat := true
+	if status == "pending" {
+		stat = false
+	}
 
 	tmpl, err := template.ParseFS(templates.Files, "readnotifications.html")
 	if err != nil {
@@ -199,6 +233,9 @@ func ReadNotificationsHandler(w http.ResponseWriter, r *http.Request) {
 	data := map[string]interface{}{
 		"Activities": activities,
 		"Username":   username,
+		"Moder":      Moders,
+		"Admin":      admin,
+		"Stat":       stat,
 	}
 
 	err = tmpl.Execute(w, data)

@@ -89,7 +89,15 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		ErrorHandler(w, "Error fetching posts", http.StatusInternalServerError)
 		return
 	}
-
+	status, err := database.GetPromotionStatus(db, UserID)
+	if err != nil {
+		ErrorHandler(w, "Error fetching promotion status", http.StatusInternalServerError)
+		return
+	}
+	stat := true
+	if status == "pending" {
+		stat = false
+	}
 	// Получаем категории из базы данных
 	categories, err := database.GetCategories(db)
 	if err != nil {
@@ -112,6 +120,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		"Categories": categories,
 		"Moder":      Moders,
 		"Admin":      admin,
+		"Stat":       stat,
 	}
 
 	err = tmpl.Execute(w, data)

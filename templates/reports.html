@@ -3,32 +3,68 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Open Reports</title>
+  <title>Reports</title>
+  <link rel="stylesheet" href="../static/create_post.css">
+  <link rel="stylesheet" href="../static/reports.css">
 </head>
 <body>
-<h1>Open Reports</h1>
-{{if .}}
-<table border="1">
-  <tr>
-    <th>Post Title</th>
-    <th>Reported By</th>
-    <th>Actions</th>
-  </tr>
-  {{range .}}
-  <tr>
-    <td>{{.PostTitle}}</td>
-    <td>{{.Reporter}}</td>
-    <td>
-      <a href="/post?id={{.PostID}}">📝 Open Post</a>
-      <form method="post" action="/reports?action=ignore&id={{.ID}}">
-        <button type="submit">❌ Ignore</button>
-      </form>
-    </td>
-  </tr>
-  {{end}}
-</table>
-{{else}}
-<p>No open reports.</p>
-{{end}}
+<header>
+  <div class="forum">
+    <a href="/">FORUM</a>
+  </div>
+  <nav class="heddy">
+    <div class="left">
+      <a href="/my-posts">My Posts</a>
+      <a href="/liked-posts">Liked Posts</a>
+      <a href="/reports">Reports</a>
+      <a href="/requests">Request</a>
+      <a href="/categories">Categories</a>
+      <a href="/users">Users</a>
+    </div>
+    <div class="right">
+      <a href="/create-post">Create Post</a>
+      <a href="/notifications">Notifications</a>
+      <a href="/activity-page">Activity Page</a>
+      <div class="user-menu">
+        <div class="circle">
+          {{.Username}}
+          <div class="dropdown">
+            <a href="/logout">Logout</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<main>
+  <section class="content">
+    <h1>Open Reports</h1>
+    {{if .Reports}}
+    <table border="1">
+      <tr>
+        <th>Post Title</th>
+        <th>Reported By</th>
+        <th>Actions</th>
+      </tr>
+      {{range .Reports}}
+      <tr>
+        <td>{{.PostTitle}}</td>
+        <td>{{.Reporter}}</td>
+        <td>
+          <div class="action-buttons">
+            <a href="/post?id={{.PostID}}" class="open-post">📝 Open Post</a>
+            <form method="post" action="/reports?action=ignore&id={{.ID}}">
+              <button type="submit" class="btn-ignore">❌ Ignore</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {{end}}
+    </table>
+    {{else}}
+    <p>No open reports.</p>
+    {{end}}
+  </section>
+</main>
 </body>
 </html>

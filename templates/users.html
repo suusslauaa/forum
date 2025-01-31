@@ -1,9 +1,43 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>User List</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Users</title>
+  <link rel="stylesheet" href="../static/create_post.css">
+  <link rel="stylesheet" href="../static/users.css">
 </head>
 <body>
+<header>
+  <div class="forum">
+    <a href="/">FORUM</a>
+  </div>
+  <nav class="heddy">
+    <div class="left">
+      <a href="/my-posts">My Posts</a>
+      <a href="/liked-posts">Liked Posts</a>
+      <a href="/reports">Reports</a>
+      <a href="/requests">Request</a>
+      <a href="/categories">Categories</a>
+      <a href="/users">Users</a>
+    </div>
+    <div class="right">
+      <a href="/create-post">Create Post</a>
+      <a href="/notifications">Notifications</a>
+      <a href="/activity-page">Activity Page</a>
+      <div class="user-menu">
+        <div class="circle">
+          {{.Username}}
+          <div class="dropdown">
+            <a href="/logout">Logout</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<main>
+  <section class="content">
 <h1>Users</h1>
 <table border="1">
   <tr>
@@ -13,7 +47,7 @@
     <th>Role</th>
     <th>Action</th>
   </tr>
-  {{range .}}
+  {{range .Users}}
   <tr>
     <td>{{.ID}}</td>
     <td>{{.Username}}</td>
@@ -33,5 +67,7 @@
   </tr>
   {{end}}
 </table>
+  </section>
+</main>
 </body>
 </html>

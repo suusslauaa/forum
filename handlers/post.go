@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"database/sql"
-	"fmt"
 	"forum/database"
 	"forum/templates"
 	"html/template"
@@ -49,7 +48,6 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 	if role == "admin" {
 		admin = true
 	}
-	fmt.Println(role, Moders)
 	// Получаем ID поста из параметров URL
 	postIDStr := r.URL.Query().Get("id")
 
@@ -97,7 +95,15 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/post?id="+strconv.Itoa(postID), http.StatusSeeOther)
 		return
 	}
-
+	status, err := database.GetPromotionStatus(db, UserID)
+	if err != nil {
+		ErrorHandler(w, "Error fetching promotion status", http.StatusInternalServerError)
+		return
+	}
+	stat := true
+	if status == "pending" {
+		stat = false
+	}
 	// Загружаем шаблон и передаем данные
 	tmpl, err := template.ParseFS(templates.Files, "post.html")
 	if err != nil {
@@ -114,6 +120,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 		"Moder":         Moders,
 		"Admin":         admin,
 		"UserRole":      role,
+		"Stat":          stat,
 	}
 
 	err = tmpl.Execute(w, data)

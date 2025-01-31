@@ -3,16 +3,40 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Заявка подана</title>
+  <title>Заявка на повышение до модератора</title>
+  <link rel="stylesheet" href="../static/create_post.css">
+  <link rel="stylesheet" href="../static/formoders.css"> <!-- Подключение стилей -->
 </head>
 <body>
-  <header>
-    <h1>SOSAL?</h1>
-  </header>
+<header>
+  <div class="forum">
+    <a href="/">FORUM</a>
+  </div>
+  <div class="heddy">
+    <div class="left">
+      <a href="/my-posts" class="auth-link">My Posts</a>
+      <a href="/liked-posts" class="auth-link">Liked Posts</a>
+    </div>
+    <div class="right">
+      <a href="/create-post" class="auth-link">Create Post</a>
+      <a href="/notifications" class="auth-link">Notifications</a>
+      <a href="/activity-page" class="auth-link">Activity Page</a>
+      <div class="circle">{{.Username}}
+        <div class="dropdown">
+          <a href="/logout" class="dropdown-link">Logout</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+<main>
+  <section class="sectt">
   <main>
     <h1>Ваша заявка на повышение до модератора успешно подана!</h1>
     <p>Ожидайте ответа от администратора.</p>
     <a href="/home">Вернуться на главную</a>
   </main>
+  </section>
+</main>
 </body>
 </html>

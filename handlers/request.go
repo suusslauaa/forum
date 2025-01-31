@@ -55,7 +55,7 @@ func ShowPromotionFormHandler(w http.ResponseWriter, r *http.Request) {
 	// Передаем данные в шаблон (например, имя пользователя)
 	data := map[string]interface{}{
 		"Username": username,
-		"Moders":   Moders,
+		"Moder":    Moders,
 		"Admin":    admin,
 	}
 
@@ -168,8 +168,6 @@ func AdminPromotionRequestsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", http.StatusFound)
 		return
 	}
-	Moders := true
-	admin := true
 
 	requests, err := database.GetPendingPromotionRequests(db)
 	if err != nil {
@@ -178,8 +176,6 @@ func AdminPromotionRequestsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	data := map[string]interface{}{
 		"Username": username,
-		"Moders":   Moders,
-		"Admin":    admin,
 		"Requests": requests,
 	}
 	// Загружаем шаблон и передаем данные

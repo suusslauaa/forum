@@ -80,6 +80,15 @@ func GetUserActivity(w http.ResponseWriter, r *http.Request) {
 		}
 		activities = append(activities, activity)
 	}
+	status, err := database.GetPromotionStatus(db, userID)
+	if err != nil {
+		ErrorHandler(w, "Error fetching promotion status", http.StatusInternalServerError)
+		return
+	}
+	stat := true
+	if status == "pending" {
+		stat = false
+	}
 
 	tmpl, err := template.ParseFS(templates.Files, "activity_page.html")
 	if err != nil {
@@ -93,6 +102,7 @@ func GetUserActivity(w http.ResponseWriter, r *http.Request) {
 		"Username":   username,
 		"Moder":      Moders,
 		"Admin":      admin,
+		"Stat":       stat,
 	}
 
 	err = tmpl.Execute(w, data)

@@ -23,8 +23,10 @@ func ReportsHandler(w http.ResponseWriter, r *http.Request) {
 	sessionID, err := GetSessionID(w, r)
 	if err != nil {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
 	}
-	_, loggedIn := store[sessionID.Value]
+
+	Username, loggedIn := store[sessionID.Value]
 	UserID := id[sessionID.Value]
 	if !loggedIn {
 		http.Redirect(w, r, "/login", http.StatusFound)
@@ -50,7 +52,51 @@ func ReportsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// SQL-запрос для получения открытых репортов
+	// Обработка POST-запросов (действия с репортами)
+	if r.Method == http.MethodPost {
+		action := r.URL.Query().Get("action")
+		reportID := r.URL.Query().Get("id") // Получаем ID репорта
+
+		if reportID == "" {
+			ErrorHandler(w, "Missing report ID", http.StatusBadRequest)
+			return
+		}
+
+		reportIDInt, err := strconv.Atoi(reportID)
+		if err != nil {
+			ErrorHandler(w, "Invalid report ID", http.StatusBadRequest)
+			return
+		}
+
+		switch action {
+		case "ignore":
+
+			// Получаем post_id из репорта
+			var postID int
+			err := db.QueryRow("SELECT post_id FROM reports WHERE id = ?", reportIDInt).Scan(&postID)
+			if err != nil {
+				ErrorHandler(w, "Report not found", http.StatusNotFound)
+				return
+			}
+
+			// Удаляем/обновляем репорт
+			err = database.DeletePostReport(db, postID)
+			if err != nil {
+				ErrorHandler(w, "Error updating report status", http.StatusInternalServerError)
+				return
+			}
+
+		default:
+			ErrorHandler(w, "Invalid action", http.StatusBadRequest)
+			return
+		}
+
+		// После обработки запроса перенаправляем обратно на страницу репортов
+		http.Redirect(w, r, "/reports", http.StatusFound)
+		return
+	}
+
+	// Получаем список репортов
 	rows, err := db.Query(`
 		SELECT reports.id, reports.post_id, COALESCE(posts.title, 'Deleted Post'), users.username
 		FROM reports
@@ -59,7 +105,7 @@ func ReportsHandler(w http.ResponseWriter, r *http.Request) {
 		WHERE reports.status = 'open'
 	`)
 	if err != nil {
-		http.Error(w, "Database query error", http.StatusInternalServerError)
+		ErrorHandler(w, "Database query error", http.StatusInternalServerError)
 		return
 	}
 	defer rows.Close()
@@ -70,13 +116,11 @@ func ReportsHandler(w http.ResponseWriter, r *http.Request) {
 		var report Report
 		var postTitle sql.NullString
 
-		// Сканируем данные, но обрабатываем NULL для названия поста
 		if err := rows.Scan(&report.ID, &report.PostID, &postTitle, &report.Reporter); err != nil {
 			ErrorHandler(w, "Error scanning reports", http.StatusInternalServerError)
 			return
 		}
 
-		// Если `title` == NULL, заменяем на "Deleted Post"
 		if postTitle.Valid {
 			report.PostTitle = postTitle.String
 		} else {
@@ -86,30 +130,9 @@ func ReportsHandler(w http.ResponseWriter, r *http.Request) {
 		reports = append(reports, report)
 	}
 
-	// Проверяем ошибки после `rows.Next()`
 	if err = rows.Err(); err != nil {
 		ErrorHandler(w, "Database iteration error", http.StatusInternalServerError)
 		return
-	}
-
-	if r.Method == http.MethodPost {
-		action := r.URL.Query().Get("action")
-		reportID := r.URL.Query().Get("id") // Получаем ID репорта из запроса
-
-		if reportID == "" {
-			ErrorHandler(w, "Missing report ID", http.StatusBadRequest)
-			return
-		}
-		reportIDInt, _ := strconv.Atoi(reportID)
-		switch action {
-		case "ignore":
-			database.DeletePostReport(db, reportIDInt)
-		default:
-			ErrorHandler(w, "Invalid action", http.StatusBadRequest)
-			return
-		}
-
-		http.Redirect(w, r, "/home", http.StatusFound)
 	}
 
 	// Загружаем HTML-шаблон
@@ -118,13 +141,12 @@ func ReportsHandler(w http.ResponseWriter, r *http.Request) {
 		ErrorHandler(w, "Template parsing error", http.StatusInternalServerError)
 		return
 	}
-	Moders := true
-	admin := true
+
 	data := map[string]interface{}{
-		"Moder":    Moders,
-		"Admin":    admin,
-		"UserRole": role,
+		"Username": Username,
+		"Reports":  reports,
 	}
+
 	// Отправляем данные в шаблон
 	err = tmpl.Execute(w, data)
 	if err != nil {

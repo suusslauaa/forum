@@ -45,3 +45,15 @@ func CheckUsernameExists(username string) (bool, error) {
 	err = db.QueryRow("SELECT COUNT(*) FROM users WHERE username = ?", username).Scan(&count)
 	return count > 0, err
 }
+
+func GetPromotionStatus(db *sql.DB, userID int) (string, error) {
+	var status string
+	err := db.QueryRow("SELECT status FROM promotion_requests WHERE user_id = ?", userID).Scan(&status)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return "no_request", nil // Если заявки нет, возвращаем специальное значение
+		}
+		return "", err // Возвращаем ошибку, если другая проблема
+	}
+	return status, nil
+}

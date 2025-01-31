@@ -98,18 +98,9 @@ func ReportPost(db *sql.DB, postID, userID int) error {
 }
 
 func DeletePostReport(db *sql.DB, postID int) error {
-	// Проверяем, есть ли уже репорт от этого пользователя на этот пост
-	var existingStatus string
-	err := db.QueryRow("SELECT status FROM reports WHERE post_id = ?", postID).Scan(&existingStatus)
-
-	if err == sql.ErrNoRows {
-	} else if err == nil {
-		// Если репорт уже есть, обновляем статус на "open"
-		_, err = db.Exec("UPDATE reports SET status = 'none' WHERE post_id = ? ", postID)
-		if err != nil {
-			return err
-		}
-	} else {
+	// Обновляем статус репорта, если он существует
+	_, err := db.Exec("UPDATE reports SET status = 'none' WHERE post_id = ?", postID)
+	if err != nil {
 		return err
 	}
 

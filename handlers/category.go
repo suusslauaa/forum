@@ -39,8 +39,6 @@ func CategoryHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
-	Moders := true
-	admin := true
 
 	// Обработка POST-запросов (создание, редактирование, удаление)
 	if r.Method == http.MethodPost {
@@ -115,8 +113,6 @@ func CategoryHandler(w http.ResponseWriter, r *http.Request) {
 
 	data := map[string]interface{}{
 		"Username":   username,
-		"Moder":      Moders,
-		"Admin":      admin,
 		"Categories": categories,
 	}
 

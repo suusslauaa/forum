@@ -56,6 +56,15 @@ func UserPostHandler(w http.ResponseWriter, r *http.Request) {
 		ErrorHandler(w, "Error retrieving user's posts", http.StatusInternalServerError)
 		return
 	}
+	status, err := database.GetPromotionStatus(db, UserID)
+	if err != nil {
+		ErrorHandler(w, "Error fetching promotion status", http.StatusInternalServerError)
+		return
+	}
+	stat := true
+	if status == "pending" {
+		stat = false
+	}
 
 	// Загружаем шаблон для отображения постов
 	tmpl, err := template.ParseFS(templates.Files, "my_posts.html")
@@ -72,6 +81,7 @@ func UserPostHandler(w http.ResponseWriter, r *http.Request) {
 		"Posts":    posts,
 		"Moder":    Moders,
 		"Admin":    admin,
+		"Stat":     stat,
 	}
 
 	// Рендерим шаблон

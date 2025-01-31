@@ -35,7 +35,7 @@ func EditPostHandler(w http.ResponseWriter, r *http.Request) {
 		ErrorHandler(w, "Invalid post ID", http.StatusBadRequest)
 		return
 	}
-
+	UserID := id[sessionID.Value]
 	// Если метод GET, отображаем форму для создания поста
 	if r.Method == http.MethodGet {
 		// Получаем список категорий из базы данных
@@ -50,6 +50,15 @@ func EditPostHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			ErrorHandler(w, "Error fetching user role", http.StatusInternalServerError)
 			return
+		}
+		status, err := database.GetPromotionStatus(db, UserID)
+		if err != nil {
+			ErrorHandler(w, "Error fetching promotion status", http.StatusInternalServerError)
+			return
+		}
+		stat := true
+		if status == "pending" {
+			stat = false
 		}
 		Moders := false
 		if role == "moder" || role == "admin" {
@@ -89,6 +98,7 @@ func EditPostHandler(w http.ResponseWriter, r *http.Request) {
 			"Category": categories,
 			"Check":    checker,
 			"Post":     post,
+			"Stat":     stat,
 		}
 		if checker != "" {
 			checker = ""

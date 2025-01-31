@@ -1,31 +1,73 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Manage Categories</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Categories</title>
+  <link rel="stylesheet" href="../static/create_post.css">
+  <link rel="stylesheet" href="../static/categories.css">
 </head>
 <body>
-<h1>Categories</h1>
+<header>
+  <div class="forum">
+    <a href="/">FORUM</a>
+  </div>
+  <nav class="heddy">
+    <div class="left">
+      <a href="/my-posts">My Posts</a>
+      <a href="/liked-posts">Liked Posts</a>
+      <a href="/reports">Reports</a>
+      <a href="/requests">Request</a>
+      <a href="/categories">Categories</a>
+      <a href="/users">Users</a>
+    </div>
+    <div class="right">
+      <a href="/create-post">Create Post</a>
+      <a href="/notifications">Notifications</a>
+      <a href="/activity-page">Activity Page</a>
+      <div class="user-menu">
+        <div class="circle">
+          {{.Username}}
+          <div class="dropdown">
+            <a href="/logout">Logout</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<main>
+  <section class="content">
+    <h1>Categories</h1>
 
-<h2>Add Category</h2>
-<form method="post" action="/categories?action=create">
-  <input type="text" name="name" placeholder="Category name" required>
-  <button type="submit">Add</button>
-</form>
+    <div class="category-section">
+      <h2>Add Category</h2>
+      <form method="post" action="/categories?action=create" class="category-form">
+        <input type="text" name="name" placeholder="Category name" required>
+        <button type="submit">Add Category</button>
+      </form>
+    </div>
 
-<h2>Existing Categories</h2>
-<ul>
-  {{range .}}
-  <li>
-    {{.Name}}
-    <form method="post" action="/categories?action=edit&id={{.ID}}" style="display:inline;">
-      <input type="text" name="name" placeholder="New name" required>
-      <button type="submit">Edit</button>
-    </form>
-    <form method="post" action="/categories?action=delete&id={{.ID}}" style="display:inline;">
-      <button type="submit">Delete</button>
-    </form>
-  </li>
-  {{end}}
-</ul>
+    <div class="category-list">
+      <h2>Existing Categories</h2>
+      <ul>
+        {{range .Categories}}
+        <li class="category-item">
+          <span class="category-name">{{.Name}}</span>
+          <div class="category-actions">
+            <form method="post" action="/categories?action=edit&id={{.ID}}">
+              <input type="text" name="name" placeholder="New name" required>
+              <button type="submit" class="edit-btn">Edit</button>
+            </form>
+            <form method="post" action="/categories?action=delete&id={{.ID}}">
+              <button type="submit" class="delete-btn">Delete</button>
+            </form>
+          </div>
+        </li>
+        {{end}}
+      </ul>
+    </div>
+  </section>
+</main>
 </body>
 </html>

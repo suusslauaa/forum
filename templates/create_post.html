@@ -17,7 +17,9 @@
                 <a href="/liked-posts">Liked Posts</a>
                 {{if or .Moders .Admin}}
                 {{else}}
-                <a href="/gomoder">Want Moder</a>
+                {{if .Stat}}
+                <a href="/gomoder" class="auth-link">Want Moder</a>
+                {{end}}
                 {{end}}
                 {{if .Admin}}
                 <a href="/reports">Reports</a>
@@ -54,10 +56,10 @@
                 <textarea id="content" name="content" class="form-textarea" placeholder="Write your post content here" required></textarea>
                 <label for="category" class="form-label">Category:</label>
                 <select id="category" name="category" class="form-select">
+                    <option value="">No Category</option>
                     {{range .Category}}
                     <option value="{{.ID}}">{{.Name}}</option>
                     {{end}}
-                    <option value="">No Category</option>
                 </select>
                 <label for="image" class="form-label">Upload Image:</label>
                 <input type="file" id="image" name="image" class="form-input" accept="image/*">

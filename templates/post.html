@@ -18,7 +18,9 @@
                 <a href="/liked-posts">Liked Posts</a>
                 {{if or .Moder .Admin}}
                 {{else}}
-                <a href="/gomoder">Want Moder</a>
+                {{if .Stat}}
+                <a href="/gomoder" class="auth-link">Want Moder</a>
+                {{end}}
                 {{end}}
                 {{if .Admin}}
                 <a href="/reports">Reports</a>

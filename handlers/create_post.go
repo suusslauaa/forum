@@ -25,7 +25,7 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	loggedInUserID := id[sessionID.Value]
-
+	userID := id[sessionID.Value]
 	// Если метод GET, отображаем форму для создания поста
 	if r.Method == http.MethodGet {
 		// Получаем список категорий из базы данных
@@ -55,6 +55,15 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 			ErrorHandler(w, "Error fetching categories", http.StatusInternalServerError)
 			return
 		}
+		status, err := database.GetPromotionStatus(db, userID)
+		if err != nil {
+			ErrorHandler(w, "Error fetching promotion status", http.StatusInternalServerError)
+			return
+		}
+		stat := true
+		if status == "pending" {
+			stat = false
+		}
 
 		// Передаем категории в шаблон
 		tmpl, err := template.ParseFS(templates.Files, "create_post.html")
@@ -63,11 +72,12 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		data := map[string]interface{}{
-			"Username":   username,
-			"Moder":      Moders,
-			"UserID":     loggedInUserID,
-			"Admin":      admin,
-			"Categories": categories,
+			"Username": username,
+			"Moder":    Moders,
+			"UserID":   loggedInUserID,
+			"Admin":    admin,
+			"Category": categories,
+			"Stat":     stat,
 		}
 
 		err = tmpl.Execute(w, data)
