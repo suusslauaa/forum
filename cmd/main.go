@@ -13,7 +13,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var limiter = rate.NewLimiter(1, 15)
+var limiter = rate.NewLimiter(1, 5)
 
 func main() {
 	// Открытие подключения к базе данных
@@ -25,10 +25,10 @@ func main() {
 	// Создание категорий и постов (если нужно)
 	database.CreateCategory(db, "General")
 	database.CreateCategory(db, "Technology")
-	// err = database.CreateUser(db, "user@example.com", "username123", "password123", "admin")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	//err = database.CreateUser(db, "user@example.com", "username123", "password123", "admin")
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
 
 	// Настройка обработчиков HTTP
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
