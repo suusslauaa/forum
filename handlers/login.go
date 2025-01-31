@@ -84,6 +84,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 				HttpOnly: true,
 				Secure:   true,
 				Path:     "/",
+				MaxAge:   3600,
 			}
 			http.SetCookie(w, sessionIDCookie)
 			sessionID = sessionIDValue

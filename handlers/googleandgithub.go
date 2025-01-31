@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"forum/database"
-	"github.com/gofrs/uuid"
 	"golang.org/x/oauth2"
 	"log"
 	"net/http"
@@ -100,15 +99,7 @@ func GoogleCallback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Получаем сессию пользователя
-	sessionID, err := r.Cookie("session_id")
-	if err != nil {
-		// Если сессии нет, создаем новую
-		sessionID = &http.Cookie{
-			Name:  "session_id",
-			Value: uuid.Must(uuid.NewV4()).String(), // Используем gofrs/uuid для генерации UUID
-		}
-		http.SetCookie(w, sessionID)
-	}
+	sessionID, _ := GetSessionID(w, r)
 
 	// Сохраняем ID пользователя в store, используя sessionID
 	store[sessionID.Value] = userInfo.Name[:1]
@@ -121,6 +112,7 @@ func GoogleCallback(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 		Secure:   true,
 		Path:     "/",
+		MaxAge:   3600,
 	}
 	http.SetCookie(w, sessionIDCookie)
 	log.Printf("User info: %+v", userInfo)
@@ -200,14 +192,7 @@ func GitHubCallback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Создаем сессию для пользователя
-	sessionID, err := r.Cookie("session_id")
-	if err != nil {
-		sessionID = &http.Cookie{
-			Name:  "session_id",
-			Value: uuid.Must(uuid.NewV4()).String(),
-		}
-		http.SetCookie(w, sessionID)
-	}
+	sessionID, _ := GetSessionID(w, r)
 
 	// Сохраняем ID пользователя в store
 	store[sessionID.Value] = userInfo.Login[:1]
